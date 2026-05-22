@@ -21,16 +21,6 @@
 
 #include "shaders/class.hpp"
 
-int wWidth = 1280;
-int wHeight = 720;
-
-void inputCheck(GLFWwindow* window, glm::mat4& matrix);
-void resize_callback(GLFWwindow* window,int width, int height);
-
-void vertexRingGenerator(const int &vertices, const int &vertexAttribCount, float *operand, const float &radius, const unsigned int &layerCount);
-void debug_printVerticesData(const int &verticesCount, const int &vertexAttribCount, float *operand);
-void elementBufferGenerator(const int &verticesCount, unsigned int *operand);
-
 class vertexBufferObject_class {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
@@ -56,6 +46,15 @@ class vertexBufferObject_class {
 
         
 };
+
+int wWidth = 1280;
+int wHeight = 720;
+
+void inputCheck(GLFWwindow* window, glm::mat4& matrix);
+void resize_callback(GLFWwindow* window,int width, int height);
+
+void vertexRingGenerator(vertexBufferObject_class &sphere);
+
 int main(){
 
     glfwInit();
@@ -93,41 +92,26 @@ int main(){
     CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -3.f));
     shaderProgram.setMat4("CameraInitialize", CameraInitialize);
 
-    vertexBufferObject_class sphere(32, 1.0);
+    vertexBufferObject_class sphere(32, 1.0f);
     
-    const unsigned int vertexCount = 32;      // EDIT TO CHANGE THE NUMBER OF VERTICES PER RING
-    const float radius = 1.0;                 // EDIT TO CHANGE THE SIZE
-    const unsigned int vertexAttribCount = 6; // EDIT TO CHANGE NUMBER OF VERTEX ATTRIBUTES
 
-    const unsigned int layerCount = (vertexCount % 4 == 0) 
-    ? (vertexCount / 2) - 1 
-    :  vertexCount / 2;
-    const unsigned int vboElementCount = (vertexCount * layerCount + 2) * vertexAttribCount;
-    float *vertices = new float[vboElementCount]{};
+    vertexRingGenerator(sphere);    
+    // debug_printVerticesData(sphere.verticesPerRingCount, sphere.stride, vertices);
     
-    vertexRingGenerator(vertexCount, vertexAttribCount, vertices, radius, layerCount);
-    // debug_printVerticesData(vertexCount, vertexAttribCount, vertices);
-    
-    unsigned int *elementBuffer = new unsigned int[(vertexCount - 1) * 3]{}; 
-    elementBufferGenerator(vertexCount, elementBuffer);
 
-    unsigned int vbo, vao, ebo;
+    unsigned int vbo, vao;
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
 
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexAttribCount * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sphere.verticesPerRingCount * sphere.stride * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (vertexCount - 1) * 3 * sizeof(unsigned int), elementBuffer, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexAttribCount * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexAttribCount * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
 
@@ -145,8 +129,7 @@ int main(){
         shaderProgram.use();
         glBindVertexArray(vao);
 
-        glDrawElements(GL_POINTS, (vertexCount - 1) * 3, GL_UNSIGNED_INT, 0);
-
+        glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
         // glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -154,8 +137,7 @@ int main(){
         glfwPollEvents();
     }
 
-    delete[] vertices;
-    delete[] elementBuffer;
+
     glfwTerminate();
     return 0;
 }
@@ -183,65 +165,31 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
 }
 
-void vertexRingGenerator(const int &verticesCount, const int &vertexAttribCount,float *operand, const float &radius,const unsigned int &layerCount ){
-    const int capacity = verticesCount * vertexAttribCount;
-    const float arcLength = 360.0 /  verticesCount; 
-    const int stride = capacity / verticesCount;     
+void vertexRingGenerator(vertexBufferObject_class &sphere){
 
 
-    for(int step = 0; step < verticesCount; step++){
-        const float yaw = glm::radians(arcLength * step);
-        const int currentVertex = stride * step;
+    for(int step = 0; step < sphere.verticesPerRingCount; step++){
+        const float yaw = glm::radians(sphere.displacementAngle * step);
+        const int currentVertex = sphere.stride * step;
 
 
-        operand[currentVertex]     = cos(yaw);   // X position Attribute    
-        operand[currentVertex + 1] = sin(yaw);   // Y position Attribute
-        operand[currentVertex + 2] = 0.0f;       // Z position Attribute
-        for(int i = 3; i <= stride - 1; i++){operand[currentVertex + i] = 1.0f;} // Setting the color attribute, radians are all the same
+        sphere.vertices[currentVertex]     = cos(yaw);   // X position Attribute    
+        sphere.vertices[currentVertex + 1] = sin(yaw);   // Y position Attribute
+        sphere.vertices[currentVertex + 2] = 0.0f;       // Z position Attribute
+        for(int i = 3; i <= sphere.stride - 1; i++){sphere.vertices[currentVertex + i] = 1.0f;} // Setting the color attribute, radians are all the same
         
         // Correcting for floating point precision error during angle to radians conversion
-        operand[currentVertex] = std::abs(operand[currentVertex]) < 0.0001 ? 0.0f : operand[currentVertex]; 
-        operand[currentVertex] = std::abs(operand[currentVertex]) > 0.9999 ? std::copysign(1.0, operand[currentVertex]) : operand[currentVertex];
+        sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex]; 
+        sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex]) : sphere.vertices[currentVertex];
 
-        operand[currentVertex + 1] = std::abs(operand[currentVertex + 1]) < 0.0001 ? 0.0f : operand[currentVertex + 1];
-        operand[currentVertex + 1] = std::abs(operand[currentVertex + 1]) > 0.9999 ? std::copysign(1.0, operand[currentVertex + 1]) : operand[currentVertex + 1];
+        sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + 1];
+        sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + 1]) : sphere.vertices[currentVertex + 1];
 
-        // Scale to radius
-        operand[currentVertex]     *= radius; // X Attrubute 
-        operand[currentVertex + 1] *= radius; // Y Attrubute
-        operand[currentVertex + 2] *= radius; // Z Attrubute
+        // Scale to sphere.radius
+        sphere.vertices[currentVertex]     *= sphere.radius; // X Attrubute 
+        sphere.vertices[currentVertex + 1] *= sphere.radius; // Y Attrubute
+        sphere.vertices[currentVertex + 2] *= sphere.radius; // Z Attrubute
     }    
 }
 
-void elementBufferGenerator(const int &verticesCount, unsigned int *operand){
-    const int capacity = (verticesCount - 1) * 3; // 3 vertices per triangle
 
-    unsigned int vertex = 0;
-    for(int i = 0; i < capacity - 1; i++){ // Leave the last element 
-        operand[i] = vertex;
-        vertex = ((i + 1) % 3) == 0 ? vertex -= 1 : vertex += 1;
-    }
-    operand[capacity] = 1; // Since it has to loop back to the first
-    
-    /*
-    std::cout << "element buffer object population:" << std::endl;
-    for(int i = 0; i < capacity; i++){
-        
-        std::cout << operand[i] << " , ";
-    }
-    std::cout << std::endl;
-    */
-}
-
-void debug_printVerticesData(const int &verticesCount, const int &vertexAttribCount, float *operand){
-    const int capacity = verticesCount * vertexAttribCount; // vertexAttribCount is the total attributes per vertex (3 position data, 3 color data)
-    const int stride = capacity / verticesCount;
-    
-    std::cout << "|";
-    for(int i = 0; i < capacity; i++){
-        std::cout << operand[i] << ", ";
-        if((i + 1) % vertexAttribCount == 0){std::cout << "|" << std::endl << "|";}
-        
-    }
-    
-}
