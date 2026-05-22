@@ -27,10 +27,35 @@ int wHeight = 720;
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
-void vertexRingGenerator(const int &vertices, const int &vertexAttribCount, float *operand, const float &radius);
+void vertexRingGenerator(const int &vertices, const int &vertexAttribCount, float *operand, const float &radius, const unsigned int &layerCount);
 void debug_printVerticesData(const int &verticesCount, const int &vertexAttribCount, float *operand);
 void elementBufferGenerator(const int &verticesCount, unsigned int *operand);
 
+class vertexBufferObject_class {
+    public:
+        const unsigned int stride = 6; // Number of attributes per vertex 
+      
+        // Construct parameters
+        unsigned int verticesPerRingCount;
+        float radius;
+
+        vertexBufferObject_class(const unsigned int verticesPerRingCount, const float radius)
+        : verticesPerRingCount(verticesPerRingCount), radius(radius){}
+
+
+        // Attributes derived from construct parameters
+        const unsigned int layerCount = (verticesPerRingCount % 4 == 0) 
+        ?(verticesPerRingCount / 2) - 1 
+        : verticesPerRingCount / 2;
+        const unsigned int totalVerticesCount = verticesPerRingCount * layerCount + 2;
+        const unsigned int capacity = totalVerticesCount * stride; 
+        const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
+        
+
+        float *vertices = new float [totalVerticesCount * stride]{0.0f};
+
+        
+};
 int main(){
 
     glfwInit();
@@ -68,14 +93,19 @@ int main(){
     CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -3.f));
     shaderProgram.setMat4("CameraInitialize", CameraInitialize);
 
+    vertexBufferObject_class sphere(32, 1.0);
     
-    const int vertexCount = 32; // EDIT TO CHANGE THE DIMENSIONS
-    const float radius = 1.0;  // EDIT TO CHANGE THE SIZE
-    const int vertexAttribCount = 6;
+    const unsigned int vertexCount = 32;      // EDIT TO CHANGE THE NUMBER OF VERTICES PER RING
+    const float radius = 1.0;                 // EDIT TO CHANGE THE SIZE
+    const unsigned int vertexAttribCount = 6; // EDIT TO CHANGE NUMBER OF VERTEX ATTRIBUTES
 
-    float *vertices = new float[vertexCount * vertexAttribCount]{};
+    const unsigned int layerCount = (vertexCount % 4 == 0) 
+    ? (vertexCount / 2) - 1 
+    :  vertexCount / 2;
+    const unsigned int vboElementCount = (vertexCount * layerCount + 2) * vertexAttribCount;
+    float *vertices = new float[vboElementCount]{};
     
-    vertexRingGenerator(vertexCount, vertexAttribCount, vertices, radius);
+    vertexRingGenerator(vertexCount, vertexAttribCount, vertices, radius, layerCount);
     // debug_printVerticesData(vertexCount, vertexAttribCount, vertices);
     
     unsigned int *elementBuffer = new unsigned int[(vertexCount - 1) * 3]{}; 
@@ -153,13 +183,11 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
 }
 
-void vertexRingGenerator(const int &verticesCount, const int &vertexAttribCount,float *operand, const float &radius){
+void vertexRingGenerator(const int &verticesCount, const int &vertexAttribCount,float *operand, const float &radius,const unsigned int &layerCount ){
     const int capacity = verticesCount * vertexAttribCount;
     const float arcLength = 360.0 /  verticesCount; 
     const int stride = capacity / verticesCount;     
-    const unsigned int layerCount = (verticesCount % 4 == 0) 
-    ? (verticesCount / 2) - 1 
-    :  verticesCount / 2;
+
 
     for(int step = 0; step < verticesCount; step++){
         const float yaw = glm::radians(arcLength * step);
