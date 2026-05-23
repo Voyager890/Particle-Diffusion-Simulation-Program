@@ -13,15 +13,13 @@
 #include <glm/ext/vector_float4.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/geometric.hpp>
-#include <iterator>
 #include <math.h>
 #include <new>
-#include <random>
 #include <cmath>
 
 #include "shaders/class.hpp"
 
-class vertexBufferObject_class {
+class class_vertexBufferObject {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
       
@@ -29,7 +27,7 @@ class vertexBufferObject_class {
         unsigned int verticesPerRingCount;
         float radius;
 
-        vertexBufferObject_class(const unsigned int verticesPerRingCount, const float radius)
+        class_vertexBufferObject(const unsigned int verticesPerRingCount, const float radius)
         : verticesPerRingCount(verticesPerRingCount), radius(radius){}
 
 
@@ -53,7 +51,8 @@ int wHeight = 720;
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
-void vertexRingGenerator(vertexBufferObject_class &sphere);
+void vertexRingGenerator(class_vertexBufferObject &sphere);
+void debug_vboDataDisplayer(class_vertexBufferObject &sphere);
 
 int main(){
 
@@ -92,13 +91,9 @@ int main(){
     CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -3.f));
     shaderProgram.setMat4("CameraInitialize", CameraInitialize);
 
-    vertexBufferObject_class sphere(32, 1.0f);
-    
-
+    class_vertexBufferObject sphere(64, 1.0f);
     vertexRingGenerator(sphere);    
-    // debug_printVerticesData(sphere.verticesPerRingCount, sphere.stride, vertices);
-    
-
+    debug_vboDataDisplayer(sphere);
     unsigned int vbo, vao;
 
     glGenVertexArrays(1, &vao);
@@ -165,31 +160,41 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
 }
 
-void vertexRingGenerator(vertexBufferObject_class &sphere){
+void vertexRingGenerator(class_vertexBufferObject &sphere){
 
+    for(int currentLayer = 0; currentLayer < sphere.layerCount; currentLayer++){
+        const float pitch = glm::radians(90.0 - (currentLayer * sphere.displacementAngle));
 
-    for(int step = 0; step < sphere.verticesPerRingCount; step++){
-        const float yaw = glm::radians(sphere.displacementAngle * step);
-        const int currentVertex = sphere.stride * step;
+        for(int step = 0; step < sphere.verticesPerRingCount; step++){
+            const float yaw = glm::radians(sphere.displacementAngle * step);
+            const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * currentLayer);
 
+            sphere.vertices[currentVertex]     = cos(yaw);   // X position Attribute    
+            sphere.vertices[currentVertex + 1] = sin(yaw);   // Y position Attribute
+            sphere.vertices[currentVertex + 2] = sin(pitch); // Z position Attribute
+            for(int i = 3; i <= sphere.stride - 1; i++){sphere.vertices[currentVertex + i] = 1.0f;} // Setting the color attribute, radians are all the same
+            
+            // Correcting for floating point precision error during angle to radians conversion
+            sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex]; 
+            sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex]) : sphere.vertices[currentVertex];
 
-        sphere.vertices[currentVertex]     = cos(yaw);   // X position Attribute    
-        sphere.vertices[currentVertex + 1] = sin(yaw);   // Y position Attribute
-        sphere.vertices[currentVertex + 2] = 0.0f;       // Z position Attribute
-        for(int i = 3; i <= sphere.stride - 1; i++){sphere.vertices[currentVertex + i] = 1.0f;} // Setting the color attribute, radians are all the same
-        
-        // Correcting for floating point precision error during angle to radians conversion
-        sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex]; 
-        sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex]) : sphere.vertices[currentVertex];
+            sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + 1];
+            sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + 1]) : sphere.vertices[currentVertex + 1];
 
-        sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + 1];
-        sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + 1]) : sphere.vertices[currentVertex + 1];
-
-        // Scale to sphere.radius
-        sphere.vertices[currentVertex]     *= sphere.radius; // X Attrubute 
-        sphere.vertices[currentVertex + 1] *= sphere.radius; // Y Attrubute
-        sphere.vertices[currentVertex + 2] *= sphere.radius; // Z Attrubute
-    }    
+            // Scale to sphere.radius
+            sphere.vertices[currentVertex]     *= sphere.radius; // X Attrubute 
+            sphere.vertices[currentVertex + 1] *= sphere.radius; // Y Attrubute
+            sphere.vertices[currentVertex + 2] *= sphere.radius; // Z Attrubute
+        }    
+    }
 }
 
-
+void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
+    for(int element = 0; element < sphere.capacity; element++){
+        if(element % 6 == 0 && element != 0){
+            std::cout << std::endl << sphere.vertices[element] << ", ";
+        }else{
+        std::cout << sphere.vertices[element] << ", ";
+        }
+    }
+}
