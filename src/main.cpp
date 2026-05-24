@@ -32,15 +32,14 @@ class class_vertexBufferObject {
 
 
         // Attributes derived from construct parameters
-        const unsigned int layerCount = (verticesPerRingCount % 4 == 0) 
-        ?(verticesPerRingCount / 2) - 1 
-        : verticesPerRingCount / 2;
-        const unsigned int totalVerticesCount = verticesPerRingCount * layerCount + 2;
+        const bool loneEndVertex = (verticesPerRingCount % 4 == 0) ? true : false; // Referring to the first and last layer
+        const unsigned int layerCount = loneEndVertex ?(verticesPerRingCount / 2) - 1 : verticesPerRingCount / 2; // Doesnt count end vertices as layers  
+        unsigned int totalVerticesCount = (verticesPerRingCount * layerCount); // A variable since it will change when appending the first and final vertex
         const unsigned int capacity = totalVerticesCount * stride; 
         const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
         
 
-        float *vertices = new float [totalVerticesCount * stride]{0.0f};
+        float *vertices = new float [capacity]{};
 
         
 };
@@ -52,9 +51,25 @@ void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
 void vertexRingGenerator(class_vertexBufferObject &sphere);
+void primaryVertexInit(class_vertexBufferObject &sphere);
 void debug_vboDataDisplayer(class_vertexBufferObject &sphere);
 
 int main(){
+    // Initialize the required parameters
+    int iVerticesPerRing = 8;
+    float iRadius = 1.0f;
+    bool entryChoice;
+
+    std::cout << "Enter a non-zero number to proceed with manual entry of sphere properties,\n"
+              << "otherwise enter 0 to proceed with te initial properties\n";
+    std::cin >> entryChoice;
+    if (entryChoice) {
+        std::cout << "Enter the number of vertices per ring" << std::endl;
+        std::cin >> iVerticesPerRing;
+        std::cout << "Enter the radius of the sphere" << std::endl;
+        std::cin >> iRadius;
+    }
+    
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -88,12 +103,13 @@ int main(){
     shaderProgram.setMat4("Projection", ProjectionMatrix);
     
     glm::mat4 CameraInitialize = glm::mat4(1.0f);
-    CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -3.f));
+    CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -6.f));
     shaderProgram.setMat4("CameraInitialize", CameraInitialize);
 
-    class_vertexBufferObject sphere(64, 1.0f);
+    class_vertexBufferObject sphere(iVerticesPerRing, iRadius);
     vertexRingGenerator(sphere);    
     debug_vboDataDisplayer(sphere);
+
     unsigned int vbo, vao;
 
     glGenVertexArrays(1, &vao);
@@ -102,7 +118,7 @@ int main(){
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere.verticesPerRingCount * sphere.stride * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sphere.totalVerticesCount * sphere.stride * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -161,6 +177,7 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
 }
 
 void vertexRingGenerator(class_vertexBufferObject &sphere){
+    
 
     for(int currentLayer = 0; currentLayer < sphere.layerCount; currentLayer++){
         const float pitch = glm::radians(90.0 - (currentLayer * sphere.displacementAngle));
@@ -169,32 +186,43 @@ void vertexRingGenerator(class_vertexBufferObject &sphere){
             const float yaw = glm::radians(sphere.displacementAngle * step);
             const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * currentLayer);
 
-            sphere.vertices[currentVertex]     = cos(yaw);   // X position Attribute    
-            sphere.vertices[currentVertex + 1] = sin(yaw);   // Y position Attribute
-            sphere.vertices[currentVertex + 2] = sin(pitch); // Z position Attribute
-            for(int i = 3; i <= sphere.stride - 1; i++){sphere.vertices[currentVertex + i] = 1.0f;} // Setting the color attribute, radians are all the same
+            // Calculate and scale vertex position to fit the radius sphere
+            sphere.vertices[currentVertex]     = cos(yaw)   * (cos(pitch) * sphere.radius);   // X position Attribute    
+            sphere.vertices[currentVertex + 1] = sin(yaw)   * (cos(pitch) * sphere.radius);   // Y position Attribute
+            sphere.vertices[currentVertex + 2] = sin(pitch) * sphere.radius;   // Z position Attribute
             
-            // Correcting for floating point precision error during angle to radians conversion
-            sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex]; 
-            sphere.vertices[currentVertex] = std::abs(sphere.vertices[currentVertex]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex]) : sphere.vertices[currentVertex];
-
-            sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + 1];
-            sphere.vertices[currentVertex + 1] = std::abs(sphere.vertices[currentVertex + 1]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + 1]) : sphere.vertices[currentVertex + 1];
-
-            // Scale to sphere.radius
-            sphere.vertices[currentVertex]     *= sphere.radius; // X Attrubute 
-            sphere.vertices[currentVertex + 1] *= sphere.radius; // Y Attrubute
-            sphere.vertices[currentVertex + 2] *= sphere.radius; // Z Attrubute
+            // Setting the color attribute, values are all the same
+            for(int i = 3; i <= sphere.stride - 1; i++){sphere.vertices[currentVertex + i] = 1.0f;} 
+            
+            // Correcting for floating point precision error in angle to radians conversion
+            for(int i = 0; i < 3; i++){
+                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + i]; 
+                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + i]) : sphere.vertices[currentVertex + i];
+            }
         }    
     }
 }
 
+void primaryVertexInit(class_vertexBufferObject &sphere){}
+
 void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
+    std::cout << "Vertices Per Ring: " << sphere.verticesPerRingCount << std::endl
+              << "Total Vertices: " << sphere.totalVerticesCount << std::endl
+              << "Layer Count: " << sphere.layerCount << std::endl
+              << "Array Capacity: " << sphere.capacity << std::endl;
+
+    const int elementsPerLayer = sphere.verticesPerRingCount * sphere.stride;
     for(int element = 0; element < sphere.capacity; element++){
-        if(element % 6 == 0 && element != 0){
+        if(element % (elementsPerLayer) == 0){
+            // std::cout << "\nLayer: " << element / elementsPerLayer << std::endl;
+        }
+
+        if(element % 6 == 0){
             std::cout << std::endl << sphere.vertices[element] << ", ";
         }else{
         std::cout << sphere.vertices[element] << ", ";
         }
     }
+
+    std::cout << std:: endl;
 }
