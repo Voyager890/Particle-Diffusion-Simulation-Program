@@ -4,6 +4,7 @@
 
 #include <GL/gl.h>
 #include <cstdlib>
+#include <glm/ext/vector_float3.hpp>
 #include <iostream>
 
 #include <glm/ext/matrix_clip_space.hpp>
@@ -35,7 +36,7 @@ class class_vertexBufferObject {
         const bool loneEndVertex = (verticesPerRingCount % 4 == 0) ? true : false; // Referring to the first and last layer
         const unsigned int layerCount = loneEndVertex ?(verticesPerRingCount / 2) - 1 : verticesPerRingCount / 2; // Doesnt count end vertices as layers  
         unsigned int totalVerticesCount = (verticesPerRingCount * layerCount); // A variable since it will change when appending the first and final vertex
-        const unsigned int capacity = totalVerticesCount * stride; 
+        unsigned int capacity = totalVerticesCount * stride; 
         const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
         
 
@@ -47,6 +48,8 @@ class class_vertexBufferObject {
 int wWidth = 1280;
 int wHeight = 720;
 
+void programInit(int &iVerticesPerRing, float &iRadius);
+
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
@@ -56,20 +59,9 @@ void debug_vboDataDisplayer(class_vertexBufferObject &sphere);
 
 int main(){
     // Initialize the required parameters
-    int iVerticesPerRing = 8;
+    int iVerticesPerRing = 16;
     float iRadius = 1.0f;
-    bool entryChoice;
-
-    std::cout << "Enter a non-zero number to proceed with manual entry of sphere properties,\n"
-              << "otherwise enter 0 to proceed with te initial properties\n";
-    std::cin >> entryChoice;
-    if (entryChoice) {
-        std::cout << "Enter the number of vertices per ring" << std::endl;
-        std::cin >> iVerticesPerRing;
-        std::cout << "Enter the radius of the sphere" << std::endl;
-        std::cin >> iRadius;
-    }
-    
+    programInit(iVerticesPerRing, iRadius);
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -177,14 +169,12 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
 }
 
 void vertexRingGenerator(class_vertexBufferObject &sphere){
-    
-
     for(int currentLayer = 0; currentLayer < sphere.layerCount; currentLayer++){
-        const float pitch = glm::radians(90.0 - (currentLayer * sphere.displacementAngle));
+        const float pitch = glm::radians(90.0 - ((currentLayer + 1) * sphere.displacementAngle));
 
         for(int step = 0; step < sphere.verticesPerRingCount; step++){
             const float yaw = glm::radians(sphere.displacementAngle * step);
-            const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * currentLayer);
+            const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * (currentLayer));
 
             // Calculate and scale vertex position to fit the radius sphere
             sphere.vertices[currentVertex]     = cos(yaw)   * (cos(pitch) * sphere.radius);   // X position Attribute    
@@ -197,13 +187,39 @@ void vertexRingGenerator(class_vertexBufferObject &sphere){
             // Correcting for floating point precision error in angle to radians conversion
             for(int i = 0; i < 3; i++){
                 sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + i]; 
-                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) > 0.9999 ? std::copysign(1.0, sphere.vertices[currentVertex + i]) : sphere.vertices[currentVertex + i];
+                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) > 0.9999 * sphere.radius ? std::copysign(1.0 * sphere.radius, sphere.vertices[currentVertex + i]) : sphere.vertices[currentVertex + i];
             }
         }    
     }
+
+    primaryVertexInit(sphere);
 }
 
-void primaryVertexInit(class_vertexBufferObject &sphere){}
+void primaryVertexInit(class_vertexBufferObject &sphere){
+    float *newBuffer = new float[sphere.capacity + (2 * sphere.stride)]{0.0f};
+
+    const int offset = sphere.stride * 1; // How many starting elements to offset by 
+    for(int i = 0; i < sphere.capacity; i++){newBuffer[i + offset] = sphere.vertices[i];};
+    
+
+    newBuffer[0] = 0.0f * sphere.radius;
+    newBuffer[1] = 0.0f * sphere.radius;
+    newBuffer[2] = 1.0f * sphere.radius;
+    for(int i = 3; i < 6; i++){newBuffer[i] = 1.0f;}
+    
+    const int lastVertexElementStart = sphere.capacity + sphere.stride; // The new data array size has not beenn set yet 
+    newBuffer[lastVertexElementStart]     = 0.0f * sphere.radius;
+    newBuffer[lastVertexElementStart + 1] = 0.0f * sphere.radius;
+    newBuffer[lastVertexElementStart + 2] =-1.0f * sphere.radius;
+    for(int i = 3; i < 6; i++){
+        newBuffer[lastVertexElementStart + i] = 1.0f;
+    }
+
+    sphere.totalVerticesCount += 2;
+    sphere.capacity = sphere.totalVerticesCount * sphere.stride;
+    delete[] sphere.vertices;
+    sphere.vertices = newBuffer;
+}
 
 void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
     std::cout << "Vertices Per Ring: " << sphere.verticesPerRingCount << std::endl
@@ -214,7 +230,7 @@ void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
     const int elementsPerLayer = sphere.verticesPerRingCount * sphere.stride;
     for(int element = 0; element < sphere.capacity; element++){
         if(element % (elementsPerLayer) == 0){
-            // std::cout << "\nLayer: " << element / elementsPerLayer << std::endl;
+            std::cout << "\nLayer: " << element / elementsPerLayer << std::endl;
         }
 
         if(element % 6 == 0){
@@ -225,4 +241,22 @@ void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
     }
 
     std::cout << std:: endl;
+}
+
+void programInit(int &iVerticesPerRing, float &iRadius){
+    bool entryChoice = false;
+
+    std::cout << "Enter 1 to proceed with manual entry of sphere properties,\n"
+              << "otherwise enter 0 to proceed with te initial properties\n";
+    std::cin >> entryChoice;
+    if (entryChoice){
+        do{
+            std::cout << "Enter the number of vertices per ring, must be a power of 2 greater than 2" << std::endl;
+            std::cin >> iVerticesPerRing;
+        }while(iVerticesPerRing <= 2 || iVerticesPerRing > 0 && ((iVerticesPerRing & (iVerticesPerRing - 1)) != 0)); 
+        
+        std::cout << "Enter the radius of the sphere" << std::endl;
+        std::cin >> iRadius;
+    }
+    return;
 }
