@@ -14,6 +14,7 @@
 #include <glm/ext/vector_float4.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/geometric.hpp>
+#include <iterator>
 #include <math.h>
 #include <new>
 #include <cmath>
@@ -39,8 +40,12 @@ class class_vertexBufferObject {
         unsigned int capacity = totalVerticesCount * stride; 
         const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
         
-
         float *vertices = new float [capacity]{};
+
+        // Element Buffer Object Properties
+        const int eboVerticesPerTriangle = 3;
+        const int eboCapacity = ((layerCount - 1) * verticesPerRingCount * 2 * eboVerticesPerTriangle) + (verticesPerRingCount * eboVerticesPerTriangle * 2);
+        int *eboData = new int [eboCapacity]{};
 
         
 };
@@ -56,6 +61,8 @@ void resize_callback(GLFWwindow* window,int width, int height);
 void vertexRingGenerator(class_vertexBufferObject &sphere);
 void primaryVertexInit(class_vertexBufferObject &sphere);
 void debug_vboDataDisplayer(class_vertexBufferObject &sphere);
+void elementBufferGenerator(class_vertexBufferObject &sphere);
+
 
 int main(){
     // Initialize the required parameters
@@ -100,17 +107,19 @@ int main(){
 
     class_vertexBufferObject sphere(iVerticesPerRing, iRadius);
     vertexRingGenerator(sphere);    
-    debug_vboDataDisplayer(sphere);
 
-    unsigned int vbo, vao;
+    unsigned int vbo, vao, ebo;
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
 
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere.totalVerticesCount * sphere.stride * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sphere.capacity * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere.eboCapacity * sizeof(int), sphere.eboData, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -118,7 +127,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     
     while(!glfwWindowShouldClose(window)){
         
@@ -133,6 +142,8 @@ int main(){
         glBindVertexArray(vao);
 
         glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
+        // glDrawElements(GL_TRIANGLES, sphere.eboCapacity, GL_INT, 0);
+
         // glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -219,6 +230,20 @@ void primaryVertexInit(class_vertexBufferObject &sphere){
     sphere.capacity = sphere.totalVerticesCount * sphere.stride;
     delete[] sphere.vertices;
     sphere.vertices = newBuffer;
+}
+
+void elementBufferGenerator(class_vertexBufferObject &sphere){
+    // Initializing first prime elements data
+    for(int i = 0; i < sphere.verticesPerRingCount - 1; i++){
+        sphere.eboData[i]     = 0;      
+        sphere.eboData[i + 1] = i + 1;
+        sphere.eboData[i + 2] = i + 2;
+    }
+    // Manually entering final vertex of the ring to form the loop
+    sphere.eboData[sphere.verticesPerRingCount - 1] = 0;      
+    sphere.eboData[sphere.verticesPerRingCount] = sphere.verticesPerRingCount - 1 ;
+    sphere.eboData[sphere.verticesPerRingCount + 1] = sphere.verticesPerRingCount;
+    
 }
 
 void debug_vboDataDisplayer(class_vertexBufferObject &sphere){
