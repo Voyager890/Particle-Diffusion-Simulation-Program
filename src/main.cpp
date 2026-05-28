@@ -5,6 +5,7 @@
 #include <GL/gl.h>
 #include <algorithm>
 #include <cstdlib>
+#include <exception>
 #include <glm/ext/vector_float3.hpp>
 #include <iostream>
 
@@ -19,6 +20,7 @@
 #include <math.h>
 #include <new>
 #include <cmath>
+#include <ostream>
 
 #include "shaders/class.hpp"
 
@@ -48,7 +50,7 @@ class class_bufferObjects {
         const int eboCapacity = ((layerCount - 1) * verticesPerRingCount * 2 * eboVerticesPerTriangle) + (verticesPerRingCount * eboVerticesPerTriangle * 2);
         const int eboElementsPerVertexRing = verticesPerRingCount * eboVerticesPerTriangle;
 
-        int *eboData = new int [eboCapacity]{};
+        unsigned int *eboData = new unsigned int [eboCapacity]{};
 
 };
 
@@ -69,8 +71,8 @@ void debug_eboDataDisplayer(class_bufferObjects &sphere);
 
 int main(){
     // Initialize the required parameters
-    int iVerticesPerRing = 8;
-    float iRadius = 1.0f;
+    int iVerticesPerRing = 16;
+    float iRadius = 2.0f;
     programInit(iVerticesPerRing, iRadius);
 
     glfwInit();
@@ -111,7 +113,6 @@ int main(){
     class_bufferObjects sphere(iVerticesPerRing, iRadius);
     vertexRingGenerator(sphere);    
     elementBufferGenerator(sphere);
-    debug_vboDataDisplayer(sphere);
     debug_eboDataDisplayer(sphere);
 
     unsigned int vbo, vao, ebo;
@@ -125,7 +126,7 @@ int main(){
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sphere.capacity * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere.eboCapacity * sizeof(int), sphere.eboData, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere.eboCapacity * sizeof(unsigned int), sphere.eboData, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -147,8 +148,8 @@ int main(){
         shaderProgram.use();
         glBindVertexArray(vao);
 
-        glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
-        // glDrawElements(GL_TRIANGLES, sphere.eboCapacity, GL_INT, 0);
+        // glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
+        glDrawElements(GL_TRIANGLES, sphere.eboCapacity, GL_UNSIGNED_INT, 0);
 
         // glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -239,32 +240,63 @@ void primaryVertexInit(class_bufferObjects &sphere){
 }
 
 void elementBufferGenerator(class_bufferObjects &sphere){
-    // Initialize first prime element data
+    // Initialize first prime's element data
     sphere.eboData[0] = 0;
     sphere.eboData[1] = 1;      
-    int j = 2;
+    int inputData = 2;
     for(int i = 2; i + 2 < sphere.eboElementsPerVertexRing; i += sphere.eboVerticesPerTriangle){
-        sphere.eboData[i]     = j;
-        sphere.eboData[i + 2] = j;
-        j++;
+        sphere.eboData[i]     = inputData;
+        sphere.eboData[i + 2] = inputData;
+        inputData++;
     }
     sphere.eboData[sphere.eboElementsPerVertexRing - 1] = 1; 
     
-    // Initialize second prime element data
-    sphere.eboData[sphere.eboCapacity - sphere.eboElementsPerVertexRing + 1] = sphere.totalVerticesCount - sphere.verticesPerRingCount - 1;
-    j = sphere.totalVerticesCount - sphere.verticesPerRingCount;
+    // Initialize second prime's element data
+    const int finalPrimeStart = sphere.totalVerticesCount - sphere.verticesPerRingCount;
+    sphere.eboData[sphere.eboCapacity - sphere.eboElementsPerVertexRing + 1] = finalPrimeStart - 1;
+    inputData = finalPrimeStart;
     for(int i = sphere.eboCapacity - sphere.eboElementsPerVertexRing; i < sphere.eboCapacity - sphere.eboVerticesPerTriangle; i += sphere.eboVerticesPerTriangle){
         sphere.eboData[i]     = sphere.totalVerticesCount - 1;
-        sphere.eboData[i + 2] = j;
+        sphere.eboData[i + 2] = inputData;
         if(i + 6 == sphere.eboCapacity){
             sphere.eboData[i + 3] = sphere.totalVerticesCount - 1;
-            sphere.eboData[i + 4] = j;
-            sphere.eboData[i + 5] = sphere.totalVerticesCount - sphere.verticesPerRingCount - 1;
+            sphere.eboData[i + 4] = inputData;
+            sphere.eboData[i + 5] = finalPrimeStart - 1;
         }else{
-            sphere.eboData[i + 4] = j;
+            sphere.eboData[i + 4] = inputData;
         }
-        j++;
+        inputData++;
     } 
+    
+    // Generating element buffer data for the layers
+    inputData = 1;
+    const int firstPhaseOffset = sphere.eboElementsPerVertexRing;
+    for(int currentLayer = 0; currentLayer < sphere.layerCount - 1; currentLayer++){
+        int index = (sphere.eboElementsPerVertexRing * currentLayer) + firstPhaseOffset;
+        for(int i = index; i < index + sphere.eboElementsPerVertexRing; i += 3){
+            sphere.eboData[i]     = inputData;
+            sphere.eboData[i + 1] = inputData + 1;
+            sphere.eboData[i + 2] = inputData + sphere.verticesPerRingCount;
+
+            inputData++;
+        }
+        sphere.eboData[index + sphere.eboElementsPerVertexRing - 2] =  sphere.verticesPerRingCount * currentLayer + 1;
+    }
+
+    inputData = 1;
+    const int secondPhaseOffset = sphere.eboElementsPerVertexRing + ((sphere.layerCount - 1) * sphere.eboElementsPerVertexRing);
+    for(int currentLayer = 0; currentLayer < sphere.layerCount - 1; currentLayer++){
+        int index = (sphere.eboElementsPerVertexRing * currentLayer)+ secondPhaseOffset;
+        for(int i = index; i < index + sphere.eboElementsPerVertexRing; i += 3){
+            sphere.eboData[i]     = inputData; 
+            sphere.eboData[i + 1] = inputData + sphere.verticesPerRingCount - 1;
+            sphere.eboData[i + 2] = inputData + sphere.verticesPerRingCount;
+
+            inputData++;
+        }
+        sphere.eboData[index + 1] = (currentLayer + 1) * sphere.verticesPerRingCount + sphere.verticesPerRingCount;
+    }
+
 }
 
 void debug_vboDataDisplayer(class_bufferObjects &sphere){
@@ -294,9 +326,12 @@ void debug_eboDataDisplayer(class_bufferObjects &sphere){
 
     
     for(int i = 0; i < sphere.eboCapacity; ++i){
-        if(i == sphere.eboElementsPerVertexRing || i == sphere.eboCapacity - sphere.eboElementsPerVertexRing){std::cout << std::endl << "PRIME LAYER: " << std::endl;}         
+        if(i == sphere.eboElementsPerVertexRing || i == sphere.eboCapacity - sphere.eboElementsPerVertexRing){
+            std::cout << std::endl << "PRIME LAYER: " << std::endl;
+        }
+
         if(i % 3 == 0){
-            std::cout << std::endl << sphere.eboData[i];
+            std::cout << std::endl << i / 3 + 1 << " | " << sphere.eboData[i];
         }else{
             std::cout << ", " << sphere.eboData[i];
         } 
