@@ -24,6 +24,8 @@
 
 #include "shaders/class.hpp"
 
+#include <chrono>
+
 class class_bufferObjects {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
@@ -71,7 +73,7 @@ void debug_eboDataDisplayer(class_bufferObjects &sphere);
 
 int main(){
     // Initialize the required parameters
-    int iVerticesPerRing = 16;
+    int iVerticesPerRing = 512;
     float iRadius = 2.0f;
     programInit(iVerticesPerRing, iRadius);
 
@@ -95,7 +97,7 @@ int main(){
     glViewport(0, 0, wWidth, wHeight);
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
-
+   
     
     Shader shaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");
 
@@ -111,9 +113,14 @@ int main(){
     shaderProgram.setMat4("CameraInitialize", CameraInitialize);
 
     class_bufferObjects sphere(iVerticesPerRing, iRadius);
+
+    auto start = std::chrono::high_resolution_clock::now();
     vertexRingGenerator(sphere);    
     elementBufferGenerator(sphere);
-    debug_eboDataDisplayer(sphere);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    std::cout << "Function duration: " << elapsed.count() << std::endl;
 
     unsigned int vbo, vao, ebo;
 
@@ -135,13 +142,14 @@ int main(){
 
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
         
         inputCheck(window, Identity);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shaderProgram.setMat4("VertexTransformer", Identity);
 
@@ -189,27 +197,32 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
 void vertexRingGenerator(class_bufferObjects &sphere){
     for(int currentLayer = 0; currentLayer < sphere.layerCount; currentLayer++){
         const float pitch = glm::radians(90.0 - ((currentLayer + 1) * sphere.displacementAngle));
+        const float layerRadius = (cos(pitch) * sphere.radius); 
 
         for(int step = 0; step < sphere.verticesPerRingCount; step++){
             const float yaw = glm::radians(sphere.displacementAngle * step);
             const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * (currentLayer));
 
             // Calculate and scale vertex position to fit the radius sphere
-            sphere.vertices[currentVertex]     = cos(yaw)   * (cos(pitch) * sphere.radius);   // X position Attribute    
-            sphere.vertices[currentVertex + 1] = sin(yaw)   * (cos(pitch) * sphere.radius);   // Y position Attribute
-            sphere.vertices[currentVertex + 2] = sin(pitch) * sphere.radius;                  // Z position Attribute
+            sphere.vertices[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
+            sphere.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
+            sphere.vertices[currentVertex + 2] = sin(pitch) * sphere.radius;    // Z position Attribute
             
-            // Setting the color attribute, values are all the same
+            // Setting the color attribute
             for(int i = 3; i <= sphere.stride - 1; ++i){sphere.vertices[currentVertex + i] = 1.0f;} 
             
-            // Correcting for floating point precision error in angle to radians conversion
+            // Correcting for floating point precision error in angle to radians conversion for basis vector positions
             for(int i = 0; i < 3; ++i){
                 sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + i]; 
                 sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) > 0.9999 * sphere.radius ? std::copysign(1.0 * sphere.radius, sphere.vertices[currentVertex + i]) : sphere.vertices[currentVertex + i];
             }
         }    
     }
-
+    /*
+    What is referred to as prime/primary vertices are the 2 vertices at the top and bottom of 
+    the spheres generation. They are the only 2 vertices that are alone in their "layer".
+    The layer the prime vertices reside in are not included in the layerCount attribute.
+    */
     primaryVertexInit(sphere);
 }
 
@@ -282,7 +295,7 @@ void elementBufferGenerator(class_bufferObjects &sphere){
         }
         sphere.eboData[index + sphere.eboElementsPerVertexRing - 2] =  sphere.verticesPerRingCount * currentLayer + 1;
     }
-
+    
     inputData = 1;
     const int secondPhaseOffset = sphere.eboElementsPerVertexRing + ((sphere.layerCount - 1) * sphere.eboElementsPerVertexRing);
     for(int currentLayer = 0; currentLayer < sphere.layerCount - 1; currentLayer++){
