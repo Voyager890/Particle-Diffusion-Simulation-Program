@@ -24,12 +24,13 @@
 
 #include "shaders/class.hpp"
 
-#include <chrono>
 
 class class_bufferObjects {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
-      
+        glm::mat4 Identity = glm::mat4(1.0f);
+        glm::vec3 objectColor{1.0f};
+
         // Construct parameters
         unsigned int verticesPerRingCount;
         float radius;
@@ -73,10 +74,10 @@ void debug_eboDataDisplayer(class_bufferObjects &sphere);
 
 int main(){
     // Initialize the required parameters
-    int iVerticesPerRing = 512;
-    float iRadius = 2.0f;
-    programInit(iVerticesPerRing, iRadius);
-
+    int iVerticesPerRing = 32;
+    float iRadius = 1.0f;
+    glm::vec3 lightSourceOrigin(0.0f, 2.0f, 0.0f);    // programInit(iVerticesPerRing, iRadius);
+    glm::vec3 lightColor(1.0f);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -97,30 +98,39 @@ int main(){
     glViewport(0, 0, wWidth, wHeight);
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
-   
     
-    Shader shaderProgram("shaders/vertex.glsl", "shaders/fragment.glsl");
-
-    shaderProgram.use();
-    glm::mat4 Identity = glm::mat4(1.0f);
-    shaderProgram.setMat4("VertexTransformer", Identity);
-
-    glm::mat4 ProjectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
-    shaderProgram.setMat4("Projection", ProjectionMatrix);
     
-    glm::mat4 CameraInitialize = glm::mat4(1.0f);
-    CameraInitialize = glm::translate(CameraInitialize, glm::vec3(0.0f, 0.0f, -6.f));
-    shaderProgram.setMat4("CameraInitialize", CameraInitialize);
-
+    
     class_bufferObjects sphere(iVerticesPerRing, iRadius);
-
-    auto start = std::chrono::high_resolution_clock::now();
     vertexRingGenerator(sphere);    
     elementBufferGenerator(sphere);
-    auto end = std::chrono::high_resolution_clock::now();
+    
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
+    glm::mat4 cameraInit = glm::mat4(1.0f);
+    glm::vec3 cameraPosition(0.0f, 0.0f, -6.0f);
+    cameraInit = glm::translate(cameraInit, cameraPosition);
+    
+    
+    Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
+    shader_standarad.use();
+    shader_standarad.setMat4("motion", sphere.Identity);
+    shader_standarad.setMat4("camera", cameraInit);
+    shader_standarad.setMat4("projection", projectionMatrix);
 
-    std::chrono::duration<double, std::milli> elapsed = end - start;
-    std::cout << "Function duration: " << elapsed.count() << std::endl;
+    shader_standarad.setVec3("objectColor", sphere.objectColor);
+    shader_standarad.setVec3("lightColor", lightColor);
+    shader_standarad.setVec3("lightPos", lightSourceOrigin);
+    shader_standarad.setVec3("viewPos", cameraPosition);
+    
+    Shader shader_lightSource(SHADER_PATH"/lightSourceVertex.glsl",SHADER_PATH"/lightSourceFragment.glsl");
+
+    glm::mat4 lightSourceMotion(1.0f);
+    lightSourceMotion = glm::translate(lightSourceMotion, lightSourceOrigin);
+    shader_lightSource.setMat4("motion", lightSourceMotion);
+    shader_lightSource.setMat4("camera", cameraInit);
+    shader_lightSource.setMat4("projection", projectionMatrix);
+
+    
 
     unsigned int vbo, vao, ebo;
 
@@ -141,19 +151,19 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
         
-        inputCheck(window, Identity);
+        inputCheck(window, sphere.Identity);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shaderProgram.setMat4("VertexTransformer", Identity);
+        shader_standarad.setMat4("motion", sphere.Identity);
 
-        shaderProgram.use();
+        shader_standarad.use();
         glBindVertexArray(vao);
 
         // glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
@@ -208,8 +218,13 @@ void vertexRingGenerator(class_bufferObjects &sphere){
             sphere.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
             sphere.vertices[currentVertex + 2] = sin(pitch) * sphere.radius;    // Z position Attribute
             
-            // Setting the color attribute
-            for(int i = 3; i <= sphere.stride - 1; ++i){sphere.vertices[currentVertex + i] = 1.0f;} 
+            // Setting the normalized vertex normal data attribute
+            const double vectorLength = std::sqrt(sphere.vertices[currentVertex] * sphere.vertices[currentVertex] 
+                                      + sphere.vertices[currentVertex + 1] * sphere.vertices[currentVertex + 1]
+                                      + sphere.vertices[currentVertex + 2] * sphere.vertices[currentVertex + 2]);
+            sphere.vertices[currentVertex + 3] = sphere.vertices[currentVertex]     / vectorLength;
+            sphere.vertices[currentVertex + 4] = sphere.vertices[currentVertex + 1] / vectorLength;
+            sphere.vertices[currentVertex + 5] = sphere.vertices[currentVertex + 2] / vectorLength;
             
             // Correcting for floating point precision error in angle to radians conversion for basis vector positions
             for(int i = 0; i < 3; ++i){

@@ -17,8 +17,6 @@ target_include_directories(particleDiffusion_Simulation PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
-add_custom_command(TARGET particleDiffusion_Simulation POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/src/shaders
-    $<TARGET_FILE_DIR:particleDiffusion_Simulation>/shaders
+target_compile_definitions(particleDiffusion_Simulation PRIVATE
+    SHADER_PATH="${CMAKE_SOURCE_DIR}/src/shaders"
 )
