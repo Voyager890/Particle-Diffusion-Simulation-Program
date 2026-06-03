@@ -29,7 +29,7 @@ class class_bufferObjects {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
         glm::mat4 Identity = glm::mat4(1.0f);
-        glm::vec3 objectColor{1.0f};
+        glm::vec3 objectColor{0.8, 0.5, 0.0};
 
         // Construct parameters
         unsigned int verticesPerRingCount;
@@ -76,8 +76,11 @@ int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
     float iRadius = 1.0f;
-    glm::vec3 lightSourceOrigin(0.0f, 2.0f, 0.0f);    // programInit(iVerticesPerRing, iRadius);
+    glm::vec3 lightSourceOrigin(0.0f, 2.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
+
+    // programInit(iVerticesPerRing, iRadius);
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -120,17 +123,27 @@ int main(){
     shader_standarad.setVec3("objectColor", sphere.objectColor);
     shader_standarad.setVec3("lightColor", lightColor);
     shader_standarad.setVec3("lightPos", lightSourceOrigin);
-    shader_standarad.setVec3("viewPos", cameraPosition);
     
     Shader shader_lightSource(SHADER_PATH"/lightSourceVertex.glsl",SHADER_PATH"/lightSourceFragment.glsl");
-
+    shader_lightSource.use();
     glm::mat4 lightSourceMotion(1.0f);
     lightSourceMotion = glm::translate(lightSourceMotion, lightSourceOrigin);
     shader_lightSource.setMat4("motion", lightSourceMotion);
     shader_lightSource.setMat4("camera", cameraInit);
     shader_lightSource.setMat4("projection", projectionMatrix);
 
-    
+    float lightSourceVertices[] = {0.0f, 1.0f, 0.0f,    1.0f,-0.5f,0.0f,    -1.0f,-0.5f,0.0f};
+    unsigned int lightSourceVBO, lightSourceVAO;
+
+    glGenVertexArrays(1, &lightSourceVAO);
+    glGenBuffers(1, &lightSourceVBO);
+
+    glBindVertexArray(lightSourceVAO);
+    glBindBuffer(1, lightSourceVAO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lightSourceVertices) / sizeof(float), lightSourceVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     unsigned int vbo, vao, ebo;
 
@@ -160,17 +173,19 @@ int main(){
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        shader_standarad.setMat4("motion", sphere.Identity);
-
+        
         shader_standarad.use();
+        shader_standarad.setMat4("motion", sphere.Identity);
         glBindVertexArray(vao);
 
         // glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
         glDrawElements(GL_TRIANGLES, sphere.eboCapacity, GL_UNSIGNED_INT, 0);
 
-        // glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        shader_lightSource.use();
+        glBindVertexArray(lightSourceVAO);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -189,6 +204,7 @@ void resize_callback(GLFWwindow* window, int width, int height){
 
 void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     const float rotationSensitivity = 1.0f;
+    const float translationSensitivity = 0.1f;
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
@@ -202,6 +218,14 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     // Roll / Longitudanal
     if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians( rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
+
+    // Translation
+    if(glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, 0.0f, -translationSensitivity));};
+    if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, 0.0f, translationSensitivity));};
+    if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(translationSensitivity, 0.0f, 0.0f));};
+    if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(-translationSensitivity, 0.0f, 0.0f));};
+    if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
+    if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
 
 void vertexRingGenerator(class_bufferObjects &sphere){
@@ -247,19 +271,26 @@ void primaryVertexInit(class_bufferObjects &sphere){
     const int offset = sphere.stride * 1; // How many starting elements to offset by 
     for(int i = 0; i < sphere.capacity; ++i){newBuffer[i + offset] = sphere.vertices[i];};
     
-
-    newBuffer[0] = 0.0f * sphere.radius;
-    newBuffer[1] = 0.0f * sphere.radius;
+    // Position data
+    newBuffer[0] = 0.0f * sphere.radius;  
+    newBuffer[1] = 0.0f * sphere.radius;  
     newBuffer[2] = 1.0f * sphere.radius;
-    for(int i = 3; i < 6; ++i){newBuffer[i] = 1.0f;}
+    // Normal data  
+    newBuffer[3] = 0.0f;  
+    newBuffer[4] = 0.0f;  
+    newBuffer[5] = 1.0f;
     
-    const int lastVertexElementStart = sphere.capacity + sphere.stride; // The new data array size has not beenn set yet 
-    newBuffer[lastVertexElementStart]     = 0.0f * sphere.radius;
-    newBuffer[lastVertexElementStart + 1] = 0.0f * sphere.radius;
-    newBuffer[lastVertexElementStart + 2] =-1.0f * sphere.radius;
-    for(int i = 3; i < 6; ++i){
-        newBuffer[lastVertexElementStart + i] = 1.0f;
-    }
+    // Second prime vertex
+    const int lastVertexElementStart = sphere.capacity + sphere.stride; 
+    // Position Data
+    newBuffer[lastVertexElementStart]     =  0.0f * sphere.radius;
+    newBuffer[lastVertexElementStart + 1] =  0.0f * sphere.radius;
+    newBuffer[lastVertexElementStart + 2] = -1.0f * sphere.radius;
+    // Normal data
+    newBuffer[lastVertexElementStart + 3] = 0.0f;
+    newBuffer[lastVertexElementStart + 4] = 0.0f;
+    newBuffer[lastVertexElementStart + 5] = -1.0f;
+
 
     sphere.totalVerticesCount += 2;
     sphere.capacity = sphere.totalVerticesCount * sphere.stride;

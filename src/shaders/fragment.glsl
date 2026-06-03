@@ -7,10 +7,9 @@ in vec3 fragPos;
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform vec3 lightPos;
-uniform vec3 viewPos;
 
 void main(){
-    float ambientStrength = 0.1f;
+    float ambientStrength = 0.001f;
     vec3 ambient = lightColor * objectColor;
 
     vec3 norm = normalize(normalData);
@@ -21,5 +20,5 @@ void main(){
     vec3 result = (ambient + diffuse) * objectColor;
 
 
-    fragColor = vec4(result, 0.0f);
+    fragColor = vec4(result, 1.0f);
 }
