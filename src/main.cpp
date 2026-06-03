@@ -28,8 +28,8 @@
 class class_bufferObjects {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
-        glm::mat4 Identity = glm::mat4(1.0f);
-        glm::vec3 objectColor{0.8, 0.5, 0.0};
+        glm::mat4 motion = glm::mat4(1.0f);
+        glm::vec3 objectColor{0.8, 0.4, 0.0};
 
         // Construct parameters
         unsigned int verticesPerRingCount;
@@ -76,7 +76,7 @@ int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
     float iRadius = 1.0f;
-    glm::vec3 lightSourceOrigin(0.0f, 2.0f, 0.0f);   
+    glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
 
     // programInit(iVerticesPerRing, iRadius);
@@ -116,7 +116,7 @@ int main(){
     
     Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
     shader_standarad.use();
-    shader_standarad.setMat4("motion", sphere.Identity);
+    shader_standarad.setMat4("motion", sphere.motion);
     shader_standarad.setMat4("camera", cameraInit);
     shader_standarad.setMat4("projection", projectionMatrix);
 
@@ -169,13 +169,13 @@ int main(){
     
     while(!glfwWindowShouldClose(window)){
         
-        inputCheck(window, sphere.Identity);
+        inputCheck(window, sphere.motion);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        shader_standarad.setMat4("motion", sphere.Identity);
+        shader_standarad.setMat4("motion", sphere.motion);
         glBindVertexArray(vao);
 
         // glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
