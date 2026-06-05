@@ -4,6 +4,7 @@
 
 #include <GL/gl.h>
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <exception>
 #include <glm/ext/vector_float3.hpp>
@@ -24,12 +25,9 @@
 
 #include "shaders/class.hpp"
 
-
 class class_bufferObjects {
     public:
         const unsigned int stride = 6; // Number of attributes per vertex 
-        glm::mat4 motion = glm::mat4(1.0f);
-        glm::vec3 objectColor{0.8, 0.4, 0.0};
 
         // Construct parameters
         unsigned int verticesPerRingCount;
@@ -41,7 +39,7 @@ class class_bufferObjects {
 
         // Attributes derived from construct parameters
         const bool loneEndVertex = (verticesPerRingCount % 4 == 0) ? true : false; // Referring to the first and last layer
-        const unsigned int layerCount = loneEndVertex ?(verticesPerRingCount / 2) - 1 : verticesPerRingCount / 2; // Doesnt count end vertices as layers  
+        const unsigned int layerCount = loneEndVertex ?(verticesPerRingCount / 2) - 1 : verticesPerRingCount / 2; // Doesnt count prime vertices as layers  
         unsigned int totalVerticesCount = (verticesPerRingCount * layerCount); // A variable since it will change when appending the first and final vertex
         unsigned int capacity = totalVerticesCount * stride; 
         const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
@@ -55,6 +53,25 @@ class class_bufferObjects {
 
         unsigned int *eboData = new unsigned int [eboCapacity]{};
 
+        ~class_bufferObjects(){
+            delete [] vertices;
+            delete [] eboData;
+        }
+
+};
+
+class class_particleType {
+    public:
+    const class_bufferObjects* bufferObjectLink = nullptr;
+    const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
+    const float mass = 1.0f;
+    int particleCount = 2;
+};
+class class_particle{
+    public:
+    class_particleType* particleTypeLink = nullptr;
+    glm::vec3 velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+    glm::mat4 position = glm::mat4(1.0f);
 };
 
 int wWidth = 1280;
@@ -65,12 +82,12 @@ void programInit(int &iVerticesPerRing, float &iRadius);
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
-void vertexRingGenerator(class_bufferObjects &sphere);
-void primaryVertexInit(class_bufferObjects &sphere);
-void elementBufferGenerator(class_bufferObjects &sphere);
+void vertexRingGenerator(class_bufferObjects &bufferObjects);
+void primaryVertexInit(class_bufferObjects &bufferObjects);
+void elementBufferGenerator(class_bufferObjects &bufferObjects);
 
-void debug_vboDataDisplayer(class_bufferObjects &sphere);
-void debug_eboDataDisplayer(class_bufferObjects &sphere);
+void debug_vboDataDisplayer(class_bufferObjects &bufferObjects);
+void debug_eboDataDisplayer(class_bufferObjects &bufferObjects);
 
 int main(){
     // Initialize the required parameters
@@ -104,10 +121,19 @@ int main(){
     
     
     
-    class_bufferObjects sphere(iVerticesPerRing, iRadius);
-    vertexRingGenerator(sphere);    
-    elementBufferGenerator(sphere);
+    class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
+    vertexRingGenerator(bufferObjects);    
+    elementBufferGenerator(bufferObjects);
     
+    class_particleType particleType_Orange;
+    particleType_Orange.bufferObjectLink = &bufferObjects;
+    
+    class_particle* particle_Orange[particleType_Orange.particleCount]; 
+    for(int i = 0; i < particleType_Orange.particleCount; i++){
+        particle_Orange[i] = new class_particle;
+        particle_Orange[i]->particleTypeLink = &particleType_Orange;
+    }
+
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
     glm::mat4 cameraInit = glm::mat4(1.0f);
     glm::vec3 cameraPosition(0.0f, 0.0f, -6.0f);
@@ -116,11 +142,11 @@ int main(){
     
     Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
     shader_standarad.use();
-    shader_standarad.setMat4("motion", sphere.motion);
+    shader_standarad.setMat4("motion", particle_Orange[0]->position);
     shader_standarad.setMat4("camera", cameraInit);
     shader_standarad.setMat4("projection", projectionMatrix);
 
-    shader_standarad.setVec3("objectColor", sphere.objectColor);
+    shader_standarad.setVec3("objectColor", particleType_Orange.objectColor);
     shader_standarad.setVec3("lightColor", lightColor);
     shader_standarad.setVec3("lightPos", lightSourceOrigin);
     
@@ -154,13 +180,13 @@ int main(){
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere.capacity * sizeof(float), sphere.vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere.eboCapacity * sizeof(unsigned int), sphere.eboData, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, bufferObjects.stride * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sphere.stride * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, bufferObjects.stride * sizeof(float), (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
 
@@ -168,18 +194,19 @@ int main(){
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
-        
-        inputCheck(window, sphere.motion);
+        int current = 0; 
+        inputCheck(window, particle_Orange[current]->position);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        shader_standarad.setMat4("motion", sphere.motion);
         glBindVertexArray(vao);
-
-        // glDrawArrays(GL_POINTS, 0, sphere.totalVerticesCount);
-        glDrawElements(GL_TRIANGLES, sphere.eboCapacity, GL_UNSIGNED_INT, 0);
+        
+        for(int i = 0; i < particleType_Orange.particleCount; i++){
+            shader_standarad.setMat4("motion", particle_Orange[i]->position);
+            glDrawElements(GL_TRIANGLES, bufferObjects.eboCapacity, GL_UNSIGNED_INT, 0);
+        }
 
         shader_lightSource.use();
         glBindVertexArray(lightSourceVAO);
@@ -228,171 +255,171 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
 
-void vertexRingGenerator(class_bufferObjects &sphere){
-    for(int currentLayer = 0; currentLayer < sphere.layerCount; currentLayer++){
-        const float pitch = glm::radians(90.0 - ((currentLayer + 1) * sphere.displacementAngle));
-        const float layerRadius = (cos(pitch) * sphere.radius); 
+void vertexRingGenerator(class_bufferObjects &bufferObjects){
+    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount; currentLayer++){
+        const float pitch = glm::radians(90.0 - ((currentLayer + 1) * bufferObjects.displacementAngle));
+        const float layerRadius = (cos(pitch) * bufferObjects.radius); 
 
-        for(int step = 0; step < sphere.verticesPerRingCount; step++){
-            const float yaw = glm::radians(sphere.displacementAngle * step);
-            const int currentVertex = (sphere.stride * step) + (sphere.verticesPerRingCount * sphere.stride * (currentLayer));
+        for(int step = 0; step < bufferObjects.verticesPerRingCount; step++){
+            const float yaw = glm::radians(bufferObjects.displacementAngle * step);
+            const int currentVertex = (bufferObjects.stride * step) + (bufferObjects.verticesPerRingCount * bufferObjects.stride * (currentLayer));
 
-            // Calculate and scale vertex position to fit the radius sphere
-            sphere.vertices[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
-            sphere.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
-            sphere.vertices[currentVertex + 2] = sin(pitch) * sphere.radius;    // Z position Attribute
+            // Calculate and scale vertex position to fit the radius bufferObjects
+            bufferObjects.vertices[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
+            bufferObjects.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
+            bufferObjects.vertices[currentVertex + 2] = sin(pitch) * bufferObjects.radius;    // Z position Attribute
             
             // Setting the normalized vertex normal data attribute
-            const double vectorLength = std::sqrt(sphere.vertices[currentVertex] * sphere.vertices[currentVertex] 
-                                      + sphere.vertices[currentVertex + 1] * sphere.vertices[currentVertex + 1]
-                                      + sphere.vertices[currentVertex + 2] * sphere.vertices[currentVertex + 2]);
-            sphere.vertices[currentVertex + 3] = sphere.vertices[currentVertex]     / vectorLength;
-            sphere.vertices[currentVertex + 4] = sphere.vertices[currentVertex + 1] / vectorLength;
-            sphere.vertices[currentVertex + 5] = sphere.vertices[currentVertex + 2] / vectorLength;
+            const double vectorLength = std::sqrt(bufferObjects.vertices[currentVertex] * bufferObjects.vertices[currentVertex] 
+                                      + bufferObjects.vertices[currentVertex + 1] * bufferObjects.vertices[currentVertex + 1]
+                                      + bufferObjects.vertices[currentVertex + 2] * bufferObjects.vertices[currentVertex + 2]);
+            bufferObjects.vertices[currentVertex + 3] = bufferObjects.vertices[currentVertex]     / vectorLength;
+            bufferObjects.vertices[currentVertex + 4] = bufferObjects.vertices[currentVertex + 1] / vectorLength;
+            bufferObjects.vertices[currentVertex + 5] = bufferObjects.vertices[currentVertex + 2] / vectorLength;
             
             // Correcting for floating point precision error in angle to radians conversion for basis vector positions
             for(int i = 0; i < 3; ++i){
-                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) < 0.0001 ? 0.0f : sphere.vertices[currentVertex + i]; 
-                sphere.vertices[currentVertex + i] = std::abs(sphere.vertices[currentVertex + i]) > 0.9999 * sphere.radius ? std::copysign(1.0 * sphere.radius, sphere.vertices[currentVertex + i]) : sphere.vertices[currentVertex + i];
+                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) < 0.0001 ? 0.0f : bufferObjects.vertices[currentVertex + i]; 
+                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) > 0.9999 * bufferObjects.radius ? std::copysign(1.0 * bufferObjects.radius, bufferObjects.vertices[currentVertex + i]) : bufferObjects.vertices[currentVertex + i];
             }
         }    
     }
     /*
     What is referred to as prime/primary vertices are the 2 vertices at the top and bottom of 
-    the spheres generation. They are the only 2 vertices that are alone in their "layer".
+    the bufferObjectss generation. They are the only 2 vertices that are alone in their "layer".
     The layer the prime vertices reside in are not included in the layerCount attribute.
     */
-    primaryVertexInit(sphere);
+    primaryVertexInit(bufferObjects);
 }
 
-void primaryVertexInit(class_bufferObjects &sphere){
-    float *newBuffer = new float[sphere.capacity + (2 * sphere.stride)]{0.0f};
+void primaryVertexInit(class_bufferObjects &bufferObjects){
+    float *newBuffer = new float[bufferObjects.capacity + (2 * bufferObjects.stride)]{0.0f};
 
-    const int offset = sphere.stride * 1; // How many starting elements to offset by 
-    for(int i = 0; i < sphere.capacity; ++i){newBuffer[i + offset] = sphere.vertices[i];};
+    const int offset = bufferObjects.stride * 1; // How many starting elements to offset by 
+    for(int i = 0; i < bufferObjects.capacity; ++i){newBuffer[i + offset] = bufferObjects.vertices[i];};
     
     // Position data
-    newBuffer[0] = 0.0f * sphere.radius;  
-    newBuffer[1] = 0.0f * sphere.radius;  
-    newBuffer[2] = 1.0f * sphere.radius;
+    newBuffer[0] = 0.0f * bufferObjects.radius;  
+    newBuffer[1] = 0.0f * bufferObjects.radius;  
+    newBuffer[2] = 1.0f * bufferObjects.radius;
     // Normal data  
     newBuffer[3] = 0.0f;  
     newBuffer[4] = 0.0f;  
     newBuffer[5] = 1.0f;
     
     // Second prime vertex
-    const int lastVertexElementStart = sphere.capacity + sphere.stride; 
+    const int lastVertexElementStart = bufferObjects.capacity + bufferObjects.stride; 
     // Position Data
-    newBuffer[lastVertexElementStart]     =  0.0f * sphere.radius;
-    newBuffer[lastVertexElementStart + 1] =  0.0f * sphere.radius;
-    newBuffer[lastVertexElementStart + 2] = -1.0f * sphere.radius;
+    newBuffer[lastVertexElementStart]     =  0.0f * bufferObjects.radius;
+    newBuffer[lastVertexElementStart + 1] =  0.0f * bufferObjects.radius;
+    newBuffer[lastVertexElementStart + 2] = -1.0f * bufferObjects.radius;
     // Normal data
     newBuffer[lastVertexElementStart + 3] = 0.0f;
     newBuffer[lastVertexElementStart + 4] = 0.0f;
     newBuffer[lastVertexElementStart + 5] = -1.0f;
 
 
-    sphere.totalVerticesCount += 2;
-    sphere.capacity = sphere.totalVerticesCount * sphere.stride;
-    delete[] sphere.vertices;
-    sphere.vertices = newBuffer;
+    bufferObjects.totalVerticesCount += 2;
+    bufferObjects.capacity = bufferObjects.totalVerticesCount * bufferObjects.stride;
+    delete[] bufferObjects.vertices;
+    bufferObjects.vertices = newBuffer;
 }
 
-void elementBufferGenerator(class_bufferObjects &sphere){
+void elementBufferGenerator(class_bufferObjects &bufferObjects){
     // Initialize first prime's element data
-    sphere.eboData[0] = 0;
-    sphere.eboData[1] = 1;      
+    bufferObjects.eboData[0] = 0;
+    bufferObjects.eboData[1] = 1;      
     int inputData = 2;
-    for(int i = 2; i + 2 < sphere.eboElementsPerVertexRing; i += sphere.eboVerticesPerTriangle){
-        sphere.eboData[i]     = inputData;
-        sphere.eboData[i + 2] = inputData;
+    for(int i = 2; i + 2 < bufferObjects.eboElementsPerVertexRing; i += bufferObjects.eboVerticesPerTriangle){
+        bufferObjects.eboData[i]     = inputData;
+        bufferObjects.eboData[i + 2] = inputData;
         inputData++;
     }
-    sphere.eboData[sphere.eboElementsPerVertexRing - 1] = 1; 
+    bufferObjects.eboData[bufferObjects.eboElementsPerVertexRing - 1] = 1; 
     
     // Initialize second prime's element data
-    const int finalPrimeStart = sphere.totalVerticesCount - sphere.verticesPerRingCount;
-    sphere.eboData[sphere.eboCapacity - sphere.eboElementsPerVertexRing + 1] = finalPrimeStart - 1;
+    const int finalPrimeStart = bufferObjects.totalVerticesCount - bufferObjects.verticesPerRingCount;
+    bufferObjects.eboData[bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing + 1] = finalPrimeStart - 1;
     inputData = finalPrimeStart;
-    for(int i = sphere.eboCapacity - sphere.eboElementsPerVertexRing; i < sphere.eboCapacity - sphere.eboVerticesPerTriangle; i += sphere.eboVerticesPerTriangle){
-        sphere.eboData[i]     = sphere.totalVerticesCount - 1;
-        sphere.eboData[i + 2] = inputData;
-        if(i + 6 == sphere.eboCapacity){
-            sphere.eboData[i + 3] = sphere.totalVerticesCount - 1;
-            sphere.eboData[i + 4] = inputData;
-            sphere.eboData[i + 5] = finalPrimeStart - 1;
+    for(int i = bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing; i < bufferObjects.eboCapacity - bufferObjects.eboVerticesPerTriangle; i += bufferObjects.eboVerticesPerTriangle){
+        bufferObjects.eboData[i]     = bufferObjects.totalVerticesCount - 1;
+        bufferObjects.eboData[i + 2] = inputData;
+        if(i + 6 == bufferObjects.eboCapacity){
+            bufferObjects.eboData[i + 3] = bufferObjects.totalVerticesCount - 1;
+            bufferObjects.eboData[i + 4] = inputData;
+            bufferObjects.eboData[i + 5] = finalPrimeStart - 1;
         }else{
-            sphere.eboData[i + 4] = inputData;
+            bufferObjects.eboData[i + 4] = inputData;
         }
         inputData++;
     } 
     
     // Generating element buffer data for the layers
     inputData = 1;
-    const int firstPhaseOffset = sphere.eboElementsPerVertexRing;
-    for(int currentLayer = 0; currentLayer < sphere.layerCount - 1; currentLayer++){
-        int index = (sphere.eboElementsPerVertexRing * currentLayer) + firstPhaseOffset;
-        for(int i = index; i < index + sphere.eboElementsPerVertexRing; i += 3){
-            sphere.eboData[i]     = inputData;
-            sphere.eboData[i + 1] = inputData + 1;
-            sphere.eboData[i + 2] = inputData + sphere.verticesPerRingCount;
+    const int firstPhaseOffset = bufferObjects.eboElementsPerVertexRing;
+    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount - 1; currentLayer++){
+        int index = (bufferObjects.eboElementsPerVertexRing * currentLayer) + firstPhaseOffset;
+        for(int i = index; i < index + bufferObjects.eboElementsPerVertexRing; i += 3){
+            bufferObjects.eboData[i]     = inputData;
+            bufferObjects.eboData[i + 1] = inputData + 1;
+            bufferObjects.eboData[i + 2] = inputData + bufferObjects.verticesPerRingCount;
 
             inputData++;
         }
-        sphere.eboData[index + sphere.eboElementsPerVertexRing - 2] =  sphere.verticesPerRingCount * currentLayer + 1;
+        bufferObjects.eboData[index + bufferObjects.eboElementsPerVertexRing - 2] =  bufferObjects.verticesPerRingCount * currentLayer + 1;
     }
     
     inputData = 1;
-    const int secondPhaseOffset = sphere.eboElementsPerVertexRing + ((sphere.layerCount - 1) * sphere.eboElementsPerVertexRing);
-    for(int currentLayer = 0; currentLayer < sphere.layerCount - 1; currentLayer++){
-        int index = (sphere.eboElementsPerVertexRing * currentLayer)+ secondPhaseOffset;
-        for(int i = index; i < index + sphere.eboElementsPerVertexRing; i += 3){
-            sphere.eboData[i]     = inputData; 
-            sphere.eboData[i + 1] = inputData + sphere.verticesPerRingCount - 1;
-            sphere.eboData[i + 2] = inputData + sphere.verticesPerRingCount;
+    const int secondPhaseOffset = bufferObjects.eboElementsPerVertexRing + ((bufferObjects.layerCount - 1) * bufferObjects.eboElementsPerVertexRing);
+    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount - 1; currentLayer++){
+        int index = (bufferObjects.eboElementsPerVertexRing * currentLayer)+ secondPhaseOffset;
+        for(int i = index; i < index + bufferObjects.eboElementsPerVertexRing; i += 3){
+            bufferObjects.eboData[i]     = inputData; 
+            bufferObjects.eboData[i + 1] = inputData + bufferObjects.verticesPerRingCount - 1;
+            bufferObjects.eboData[i + 2] = inputData + bufferObjects.verticesPerRingCount;
 
             inputData++;
         }
-        sphere.eboData[index + 1] = (currentLayer + 1) * sphere.verticesPerRingCount + sphere.verticesPerRingCount;
+        bufferObjects.eboData[index + 1] = (currentLayer + 1) * bufferObjects.verticesPerRingCount + bufferObjects.verticesPerRingCount;
     }
 
 }
 
-void debug_vboDataDisplayer(class_bufferObjects &sphere){
-    std::cout << "Vertices Per Ring: " << sphere.verticesPerRingCount << std::endl
-              << "Total Vertices:    " << sphere.totalVerticesCount << std::endl
-              << "Layer Count:       " << sphere.layerCount << std::endl
-              << "Array Capacity:    " << sphere.capacity << std::endl;
+void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
+    std::cout << "Vertices Per Ring: " << bufferObjects.verticesPerRingCount << std::endl
+              << "Total Vertices:    " << bufferObjects.totalVerticesCount << std::endl
+              << "Layer Count:       " << bufferObjects.layerCount << std::endl
+              << "Array Capacity:    " << bufferObjects.capacity << std::endl;
 
-    const int elementsPerLayer = sphere.verticesPerRingCount * sphere.stride;
-    for(int element = 0; element < sphere.capacity; element++){
+    const int elementsPerLayer = bufferObjects.verticesPerRingCount * bufferObjects.stride;
+    for(int element = 0; element < bufferObjects.capacity; element++){
         if(element % (elementsPerLayer) == 0){
             std::cout << "\nLayer: " << element / elementsPerLayer << std::endl;
         }
 
         if(element % 6 == 0){
-            std::cout << std::endl << sphere.vertices[element] << ", ";
+            std::cout << std::endl << bufferObjects.vertices[element] << ", ";
         }else{
-        std::cout << sphere.vertices[element] << ", ";
+        std::cout << bufferObjects.vertices[element] << ", ";
         }
     }
 
     std::cout << std:: endl;
 }
-void debug_eboDataDisplayer(class_bufferObjects &sphere){
-    std::cout << "Total Triangles: " << sphere.eboCapacity / sphere.eboVerticesPerTriangle << std::endl
-              << "Total Elements:  " << sphere.eboCapacity << std::endl << std::endl;
+void debug_eboDataDisplayer(class_bufferObjects &bufferObjects){
+    std::cout << "Total Triangles: " << bufferObjects.eboCapacity / bufferObjects.eboVerticesPerTriangle << std::endl
+              << "Total Elements:  " << bufferObjects.eboCapacity << std::endl << std::endl;
 
     
-    for(int i = 0; i < sphere.eboCapacity; ++i){
-        if(i == sphere.eboElementsPerVertexRing || i == sphere.eboCapacity - sphere.eboElementsPerVertexRing){
+    for(int i = 0; i < bufferObjects.eboCapacity; ++i){
+        if(i == bufferObjects.eboElementsPerVertexRing || i == bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing){
             std::cout << std::endl << "PRIME LAYER: " << std::endl;
         }
 
         if(i % 3 == 0){
-            std::cout << std::endl << i / 3 + 1 << " | " << sphere.eboData[i];
+            std::cout << std::endl << i / 3 + 1 << " | " << bufferObjects.eboData[i];
         }else{
-            std::cout << ", " << sphere.eboData[i];
+            std::cout << ", " << bufferObjects.eboData[i];
         } 
     }
 
@@ -402,7 +429,7 @@ void debug_eboDataDisplayer(class_bufferObjects &sphere){
 void programInit(int &iVerticesPerRing, float &iRadius){
     bool entryChoice = false;
 
-    std::cout << "Enter 1 to proceed with manual entry of sphere properties,\n"
+    std::cout << "Enter 1 to proceed with manual entry of bufferObjects properties,\n"
               << "otherwise enter 0 to proceed with te initial properties\n";
     std::cin >> entryChoice;
     if (entryChoice){
@@ -411,7 +438,7 @@ void programInit(int &iVerticesPerRing, float &iRadius){
             std::cin >> iVerticesPerRing;
         }while(iVerticesPerRing <= 2 || iVerticesPerRing > 0 && ((iVerticesPerRing & (iVerticesPerRing - 1)) != 0)); 
         
-        std::cout << "Enter the radius of the sphere" << std::endl;
+        std::cout << "Enter the radius of the bufferObjects" << std::endl;
         std::cin >> iRadius;
     }
     return;
