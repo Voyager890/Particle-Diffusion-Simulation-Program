@@ -65,7 +65,7 @@ class class_particleType {
     const class_bufferObjects* bufferObjectLink = nullptr;
     const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
     const float mass = 1.0f;
-    int particleCount = 2;
+    int particleCount = 10;
 };
 class class_particle{
     public:
