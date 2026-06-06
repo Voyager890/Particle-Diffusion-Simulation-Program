@@ -3,13 +3,11 @@
 #include <GLFW/glfw3.h>
 
 #include <GL/gl.h>
-#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
-#include <exception>
-#include <glm/ext/vector_float3.hpp>
 #include <iostream>
 
+#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
@@ -17,10 +15,10 @@
 #include <glm/ext/vector_float4.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/geometric.hpp>
-#include <iterator>
 #include <math.h>
-#include <new>
 #include <cmath>
+
+#include <new>
 #include <ostream>
 
 #include "shaders/class.hpp"
@@ -65,7 +63,7 @@ class class_particleType {
     const class_bufferObjects* bufferObjectLink = nullptr;
     const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
     const float mass = 1.0f;
-    int particleCount = 10;
+    int particleCount = 1;
 };
 class class_particle{
     public:
@@ -123,7 +121,6 @@ int main(){
     
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
     vertexRingGenerator(bufferObjects);    
-    elementBufferGenerator(bufferObjects);
     
     class_particleType particleType_Orange;
     particleType_Orange.bufferObjectLink = &bufferObjects;
@@ -290,6 +287,7 @@ void vertexRingGenerator(class_bufferObjects &bufferObjects){
     The layer the prime vertices reside in are not included in the layerCount attribute.
     */
     primaryVertexInit(bufferObjects);
+    elementBufferGenerator(bufferObjects);
 }
 
 void primaryVertexInit(class_bufferObjects &bufferObjects){
