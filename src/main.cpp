@@ -22,55 +22,22 @@
 #include <ostream>
 
 #include "shaders/class.hpp"
+#include "class_bufferObjects/bufferObjects.h"
+#include "class_particles/particles.h"
 
-class class_bufferObjects {
-    public:
-        const unsigned int stride = 6; // Number of attributes per vertex 
-
-        // Construct parameters
-        unsigned int verticesPerRingCount;
-        float radius;
-
-        class_bufferObjects(const unsigned int verticesPerRingCount, const float radius)
-        : verticesPerRingCount(verticesPerRingCount), radius(radius){}
-
-
-        // Attributes derived from construct parameters
-        const bool loneEndVertex = (verticesPerRingCount % 4 == 0) ? true : false; // Referring to the first and last layer
-        const unsigned int layerCount = loneEndVertex ?(verticesPerRingCount / 2) - 1 : verticesPerRingCount / 2; // Doesnt count prime vertices as layers  
-        unsigned int totalVerticesCount = (verticesPerRingCount * layerCount); // A variable since it will change when appending the first and final vertex
-        unsigned int capacity = totalVerticesCount * stride; 
-        const float displacementAngle = 360.0 / verticesPerRingCount; // Angle between non-diagnolly adjacent vertices
-        
-        float *vertices = new float [capacity]{};
-
-        // Element Buffer Object Properties
-        const int eboVerticesPerTriangle = 3;
-        const int eboCapacity = ((layerCount - 1) * verticesPerRingCount * 2 * eboVerticesPerTriangle) + (verticesPerRingCount * eboVerticesPerTriangle * 2);
-        const int eboElementsPerVertexRing = verticesPerRingCount * eboVerticesPerTriangle;
-
-        unsigned int *eboData = new unsigned int [eboCapacity]{};
-
-        ~class_bufferObjects(){
-            delete [] vertices;
-            delete [] eboData;
-        }
-
-};
-
-class class_particleType {
-    public:
-    const class_bufferObjects* bufferObjectLink = nullptr;
-    const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
-    const float mass = 1.0f;
-    int particleCount = 1;
-};
-class class_particle{
-    public:
-    class_particleType* particleTypeLink = nullptr;
-    glm::vec3 velocity = glm::vec3{0.0f, 0.0f, 0.0f};
-    glm::mat4 position = glm::mat4(1.0f);
-};
+// class class_particleType {
+//     public:
+//     const class_bufferObjects* bufferObjectLink = nullptr;
+//     const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
+//     const float mass = 1.0f;
+//     int particleCount = 1;
+// };
+// class class_particle{
+//     public:
+//     class_particleType* particleTypeLink = nullptr;
+//     glm::vec3 velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+//     glm::mat4 position = glm::mat4(1.0f);
+// };
 
 int wWidth = 1280;
 int wHeight = 720;
@@ -122,9 +89,8 @@ int main(){
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
     vertexRingGenerator(bufferObjects);    
     
-    class_particleType particleType_Orange;
-    particleType_Orange.bufferObjectLink = &bufferObjects;
-    
+    class_particleType particle_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f)
+
     class_particle* particle_Orange[particleType_Orange.particleCount]; 
     for(int i = 0; i < particleType_Orange.particleCount; i++){
         particle_Orange[i] = new class_particle;
@@ -187,7 +153,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){

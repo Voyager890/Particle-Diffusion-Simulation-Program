@@ -13,17 +13,39 @@ add_executable(${EXECUTABLE_NAME}
     external/glad/glad.c
 )
 
+add_library(bufferObjects STATIC
+    libs/class_bufferObjects/bufferObjects.cpp
+)
+
+add_library(particles STATIC
+    libs/class_particles/particles.cpp
+)
+
+target_include_directories(particles PUBLIC
+    ${CMAKE_SOURCE_DIR}/libs
+)
+
+target_link_libraries(particles PUBLIC
+    bufferObjects
+    glm
+)
+
 target_link_libraries(${EXECUTABLE_NAME}
     glfw
     OpenGL::GL
     glm
+    bufferObjects
+    particles
 )
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/external
+    ${CMAKE_SOURCE_DIR}/libs
 )
 
 target_compile_definitions(${EXECUTABLE_NAME} PRIVATE
     SHADER_PATH="${CMAKE_SOURCE_DIR}/src/shaders"
 )
+
+
