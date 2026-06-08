@@ -6,8 +6,8 @@
 #include <glm/ext/matrix_float4x4.hpp>
 
 #include "class_bufferObjects/bufferObjects.h"
-class_particleType::class_particleType(class_bufferObjects &ufferObjectLink, glm::vec3 objectColor, float mass):
-bufferObjectLink(bufferObjectLink),
+class_particleType::class_particleType(class_bufferObjects &bufferObjectLink, glm::vec3 objectColor, float mass):
+bufferObjectLink(&bufferObjectLink),
 objectColor(objectColor),
 mass(mass) 
 {

@@ -25,20 +25,6 @@
 #include "class_bufferObjects/bufferObjects.h"
 #include "class_particles/particles.h"
 
-// class class_particleType {
-//     public:
-//     const class_bufferObjects* bufferObjectLink = nullptr;
-//     const glm::vec3 objectColor{0.8f, 0.5f, 0.0f};
-//     const float mass = 1.0f;
-//     int particleCount = 1;
-// };
-// class class_particle{
-//     public:
-//     class_particleType* particleTypeLink = nullptr;
-//     glm::vec3 velocity = glm::vec3{0.0f, 0.0f, 0.0f};
-//     glm::mat4 position = glm::mat4(1.0f);
-// };
-
 int wWidth = 1280;
 int wHeight = 720;
 
@@ -89,7 +75,7 @@ int main(){
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
     vertexRingGenerator(bufferObjects);    
     
-    class_particleType particle_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f)
+    class_particleType particleType_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f);
 
     class_particle* particle_Orange[particleType_Orange.particleCount]; 
     for(int i = 0; i < particleType_Orange.particleCount; i++){
