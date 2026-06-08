@@ -6,6 +6,9 @@ find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 find_package(glfw3 REQUIRED)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_bufferObjects)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_particles)
+
 set(EXECUTABLE_NAME "Diffusion")
 
 add_executable(${EXECUTABLE_NAME}
@@ -13,27 +16,11 @@ add_executable(${EXECUTABLE_NAME}
     external/glad/glad.c
 )
 
-add_library(bufferObjects STATIC
-    libs/class_bufferObjects/bufferObjects.cpp
-)
-
-add_library(particles STATIC
-    libs/class_particles/particles.cpp
-)
-
-target_include_directories(particles PUBLIC
-    ${CMAKE_SOURCE_DIR}/libs
-)
-
-target_link_libraries(particles PUBLIC
-    bufferObjects
-    glm
-)
-
 target_link_libraries(${EXECUTABLE_NAME}
     glfw
     OpenGL::GL
     glm
+
     bufferObjects
     particles
 )

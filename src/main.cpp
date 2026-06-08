@@ -139,7 +139,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
