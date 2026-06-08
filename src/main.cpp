@@ -1,3 +1,4 @@
+// External Libraris
 #include "glad/glad.h"
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
@@ -21,9 +22,11 @@
 #include <new>
 #include <ostream>
 
+// Custom Libraries
 #include "shaders/class.hpp"
 #include "class_bufferObjects/bufferObjects.h"
 #include "class_particles/particles.h"
+#include "func_proceduralSphere/proceduralSphere.h"
 
 int wWidth = 1280;
 int wHeight = 720;
@@ -33,9 +36,9 @@ void programInit(int &iVerticesPerRing, float &iRadius);
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
-void vertexRingGenerator(class_bufferObjects &bufferObjects);
-void primaryVertexInit(class_bufferObjects &bufferObjects);
-void elementBufferGenerator(class_bufferObjects &bufferObjects);
+// void vertexRingGenerator(class_bufferObjects &bufferObjects);
+// void primaryVertexInit(class_bufferObjects &bufferObjects);
+// void elementBufferGenerator(class_bufferObjects &bufferObjects);
 
 void debug_vboDataDisplayer(class_bufferObjects &bufferObjects);
 void debug_eboDataDisplayer(class_bufferObjects &bufferObjects);
@@ -74,7 +77,9 @@ int main(){
     
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
     vertexRingGenerator(bufferObjects);    
-    
+    debug_vboDataDisplayer(bufferObjects);
+    debug_eboDataDisplayer(bufferObjects);
+
     class_particleType particleType_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f);
 
     class_particle* particle_Orange[particleType_Orange.particleCount]; 
@@ -203,7 +208,7 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
-
+/*
 void vertexRingGenerator(class_bufferObjects &bufferObjects){
     for(int currentLayer = 0; currentLayer < bufferObjects.layerCount; currentLayer++){
         const float pitch = glm::radians(90.0 - ((currentLayer + 1) * bufferObjects.displacementAngle));
@@ -233,11 +238,7 @@ void vertexRingGenerator(class_bufferObjects &bufferObjects){
             }
         }    
     }
-    /*
-    What is referred to as prime/primary vertices are the 2 vertices at the top and bottom of 
-    the bufferObjectss generation. They are the only 2 vertices that are alone in their "layer".
-    The layer the prime vertices reside in are not included in the layerCount attribute.
-    */
+
     primaryVertexInit(bufferObjects);
     elementBufferGenerator(bufferObjects);
 }
@@ -334,6 +335,7 @@ void elementBufferGenerator(class_bufferObjects &bufferObjects){
     }
 
 }
+*/
 
 void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
     std::cout << "Vertices Per Ring: " << bufferObjects.verticesPerRingCount << std::endl
