@@ -99,22 +99,22 @@ void elementBufferGenerator(class_bufferObjects &bufferObjects){
     bufferObjects.eboData[bufferObjects.eboElementsPerVertexRing - 1] = 1; 
     
     // Initialize second prime's element data
-    const int finalPrimeStart = bufferObjects.totalVerticesCount - bufferObjects.verticesPerRingCount;
-    bufferObjects.eboData[bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing + 1] = finalPrimeStart - 1;
-    inputData = finalPrimeStart;
-    for(int i = bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing; i < bufferObjects.eboCapacity - bufferObjects.eboVerticesPerTriangle; i += bufferObjects.eboVerticesPerTriangle){
-        bufferObjects.eboData[i]     = bufferObjects.totalVerticesCount - 1;
-        bufferObjects.eboData[i + 2] = inputData;
-        if(i + 6 == bufferObjects.eboCapacity){
-            bufferObjects.eboData[i + 3] = bufferObjects.totalVerticesCount - 1;
-            bufferObjects.eboData[i + 4] = inputData;
-            bufferObjects.eboData[i + 5] = finalPrimeStart - 1;
-        }else{
-            bufferObjects.eboData[i + 4] = inputData;
-        }
-        inputData++;
-    } 
+    const int finalVertexNumber = bufferObjects.totalVerticesCount - 1; // aka last lone vertex
+    const int primeLayerStartVertex = bufferObjects.totalVerticesCount - bufferObjects.verticesPerRingCount - 1; // -1 since ebo values start at 0
+    const int primeLayerStartElement = bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing;
     
+    bufferObjects.eboData[primeLayerStartElement]     = finalVertexNumber; 
+    bufferObjects.eboData[primeLayerStartElement + 1] = primeLayerStartVertex; 
+    bufferObjects.eboData[primeLayerStartElement + 2] = bufferObjects.eboData[primeLayerStartElement + 1] + 1;
+
+    for(int i = primeLayerStartElement + bufferObjects.eboVerticesPerTriangle; i < bufferObjects.eboCapacity; i += 3){
+        bufferObjects.eboData[i]     = finalVertexNumber; 
+        bufferObjects.eboData[i + 1] = bufferObjects.eboData[i - 1];
+        bufferObjects.eboData[i + 2] = bufferObjects.eboData[i - 1] + 1;
+    }
+
+    bufferObjects.eboData[bufferObjects.eboCapacity - 1] = primeLayerStartVertex;
+
     // Generating element buffer data for the layers
     inputData = 1;
     const int firstPhaseOffset = bufferObjects.eboElementsPerVertexRing;
@@ -144,4 +144,5 @@ void elementBufferGenerator(class_bufferObjects &bufferObjects){
         bufferObjects.eboData[index + 1] = (currentLayer + 1) * bufferObjects.verticesPerRingCount + bufferObjects.verticesPerRingCount;
     }
 
+    
 }

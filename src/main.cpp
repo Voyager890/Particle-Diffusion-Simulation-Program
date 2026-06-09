@@ -36,10 +36,6 @@ void programInit(int &iVerticesPerRing, float &iRadius);
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
-// void vertexRingGenerator(class_bufferObjects &bufferObjects);
-// void primaryVertexInit(class_bufferObjects &bufferObjects);
-// void elementBufferGenerator(class_bufferObjects &bufferObjects);
-
 void debug_vboDataDisplayer(class_bufferObjects &bufferObjects);
 void debug_eboDataDisplayer(class_bufferObjects &bufferObjects);
 
@@ -50,7 +46,7 @@ int main(){
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
 
-    // programInit(iVerticesPerRing, iRadius);
+    programInit(iVerticesPerRing, iRadius);
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -144,7 +140,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
@@ -208,134 +204,6 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
-/*
-void vertexRingGenerator(class_bufferObjects &bufferObjects){
-    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount; currentLayer++){
-        const float pitch = glm::radians(90.0 - ((currentLayer + 1) * bufferObjects.displacementAngle));
-        const float layerRadius = (cos(pitch) * bufferObjects.radius); 
-
-        for(int step = 0; step < bufferObjects.verticesPerRingCount; step++){
-            const float yaw = glm::radians(bufferObjects.displacementAngle * step);
-            const int currentVertex = (bufferObjects.stride * step) + (bufferObjects.verticesPerRingCount * bufferObjects.stride * (currentLayer));
-
-            // Calculate and scale vertex position to fit the radius bufferObjects
-            bufferObjects.vertices[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
-            bufferObjects.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
-            bufferObjects.vertices[currentVertex + 2] = sin(pitch) * bufferObjects.radius;    // Z position Attribute
-            
-            // Setting the normalized vertex normal data attribute
-            const double vectorLength = std::sqrt(bufferObjects.vertices[currentVertex] * bufferObjects.vertices[currentVertex] 
-                                      + bufferObjects.vertices[currentVertex + 1] * bufferObjects.vertices[currentVertex + 1]
-                                      + bufferObjects.vertices[currentVertex + 2] * bufferObjects.vertices[currentVertex + 2]);
-            bufferObjects.vertices[currentVertex + 3] = bufferObjects.vertices[currentVertex]     / vectorLength;
-            bufferObjects.vertices[currentVertex + 4] = bufferObjects.vertices[currentVertex + 1] / vectorLength;
-            bufferObjects.vertices[currentVertex + 5] = bufferObjects.vertices[currentVertex + 2] / vectorLength;
-            
-            // Correcting for floating point precision error in angle to radians conversion for basis vector positions
-            for(int i = 0; i < 3; ++i){
-                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) < 0.0001 ? 0.0f : bufferObjects.vertices[currentVertex + i]; 
-                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) > 0.9999 * bufferObjects.radius ? std::copysign(1.0 * bufferObjects.radius, bufferObjects.vertices[currentVertex + i]) : bufferObjects.vertices[currentVertex + i];
-            }
-        }    
-    }
-
-    primaryVertexInit(bufferObjects);
-    elementBufferGenerator(bufferObjects);
-}
-
-void primaryVertexInit(class_bufferObjects &bufferObjects){
-    float *newBuffer = new float[bufferObjects.capacity + (2 * bufferObjects.stride)]{0.0f};
-
-    const int offset = bufferObjects.stride * 1; // How many starting elements to offset by 
-    for(int i = 0; i < bufferObjects.capacity; ++i){newBuffer[i + offset] = bufferObjects.vertices[i];};
-    
-    // Position data
-    newBuffer[0] = 0.0f * bufferObjects.radius;  
-    newBuffer[1] = 0.0f * bufferObjects.radius;  
-    newBuffer[2] = 1.0f * bufferObjects.radius;
-    // Normal data  
-    newBuffer[3] = 0.0f;  
-    newBuffer[4] = 0.0f;  
-    newBuffer[5] = 1.0f;
-    
-    // Second prime vertex
-    const int lastVertexElementStart = bufferObjects.capacity + bufferObjects.stride; 
-    // Position Data
-    newBuffer[lastVertexElementStart]     =  0.0f * bufferObjects.radius;
-    newBuffer[lastVertexElementStart + 1] =  0.0f * bufferObjects.radius;
-    newBuffer[lastVertexElementStart + 2] = -1.0f * bufferObjects.radius;
-    // Normal data
-    newBuffer[lastVertexElementStart + 3] = 0.0f;
-    newBuffer[lastVertexElementStart + 4] = 0.0f;
-    newBuffer[lastVertexElementStart + 5] = -1.0f;
-
-
-    bufferObjects.totalVerticesCount += 2;
-    bufferObjects.capacity = bufferObjects.totalVerticesCount * bufferObjects.stride;
-    delete[] bufferObjects.vertices;
-    bufferObjects.vertices = newBuffer;
-}
-
-void elementBufferGenerator(class_bufferObjects &bufferObjects){
-    // Initialize first prime's element data
-    bufferObjects.eboData[0] = 0;
-    bufferObjects.eboData[1] = 1;      
-    int inputData = 2;
-    for(int i = 2; i + 2 < bufferObjects.eboElementsPerVertexRing; i += bufferObjects.eboVerticesPerTriangle){
-        bufferObjects.eboData[i]     = inputData;
-        bufferObjects.eboData[i + 2] = inputData;
-        inputData++;
-    }
-    bufferObjects.eboData[bufferObjects.eboElementsPerVertexRing - 1] = 1; 
-    
-    // Initialize second prime's element data
-    const int finalPrimeStart = bufferObjects.totalVerticesCount - bufferObjects.verticesPerRingCount;
-    bufferObjects.eboData[bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing + 1] = finalPrimeStart - 1;
-    inputData = finalPrimeStart;
-    for(int i = bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing; i < bufferObjects.eboCapacity - bufferObjects.eboVerticesPerTriangle; i += bufferObjects.eboVerticesPerTriangle){
-        bufferObjects.eboData[i]     = bufferObjects.totalVerticesCount - 1;
-        bufferObjects.eboData[i + 2] = inputData;
-        if(i + 6 == bufferObjects.eboCapacity){
-            bufferObjects.eboData[i + 3] = bufferObjects.totalVerticesCount - 1;
-            bufferObjects.eboData[i + 4] = inputData;
-            bufferObjects.eboData[i + 5] = finalPrimeStart - 1;
-        }else{
-            bufferObjects.eboData[i + 4] = inputData;
-        }
-        inputData++;
-    } 
-    
-    // Generating element buffer data for the layers
-    inputData = 1;
-    const int firstPhaseOffset = bufferObjects.eboElementsPerVertexRing;
-    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount - 1; currentLayer++){
-        int index = (bufferObjects.eboElementsPerVertexRing * currentLayer) + firstPhaseOffset;
-        for(int i = index; i < index + bufferObjects.eboElementsPerVertexRing; i += 3){
-            bufferObjects.eboData[i]     = inputData;
-            bufferObjects.eboData[i + 1] = inputData + 1;
-            bufferObjects.eboData[i + 2] = inputData + bufferObjects.verticesPerRingCount;
-
-            inputData++;
-        }
-        bufferObjects.eboData[index + bufferObjects.eboElementsPerVertexRing - 2] =  bufferObjects.verticesPerRingCount * currentLayer + 1;
-    }
-    
-    inputData = 1;
-    const int secondPhaseOffset = bufferObjects.eboElementsPerVertexRing + ((bufferObjects.layerCount - 1) * bufferObjects.eboElementsPerVertexRing);
-    for(int currentLayer = 0; currentLayer < bufferObjects.layerCount - 1; currentLayer++){
-        int index = (bufferObjects.eboElementsPerVertexRing * currentLayer)+ secondPhaseOffset;
-        for(int i = index; i < index + bufferObjects.eboElementsPerVertexRing; i += 3){
-            bufferObjects.eboData[i]     = inputData; 
-            bufferObjects.eboData[i + 1] = inputData + bufferObjects.verticesPerRingCount - 1;
-            bufferObjects.eboData[i + 2] = inputData + bufferObjects.verticesPerRingCount;
-
-            inputData++;
-        }
-        bufferObjects.eboData[index + 1] = (currentLayer + 1) * bufferObjects.verticesPerRingCount + bufferObjects.verticesPerRingCount;
-    }
-
-}
-*/
 
 void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
     std::cout << "Vertices Per Ring: " << bufferObjects.verticesPerRingCount << std::endl

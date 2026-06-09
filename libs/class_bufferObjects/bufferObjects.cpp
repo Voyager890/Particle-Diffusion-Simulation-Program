@@ -9,7 +9,7 @@ layerCount(verticesPerRingCount / 2 - 1),
 displacementAngle(360.0 / verticesPerRingCount),
 
 eboVerticesPerTriangle(3),
-eboCapacity((layerCount - 1) * verticesPerRingCount * 2 * eboVerticesPerTriangle + verticesPerRingCount * eboVerticesPerTriangle),
+eboCapacity(2 * verticesPerRingCount * eboVerticesPerTriangle * layerCount),
 eboElementsPerVertexRing(verticesPerRingCount * eboVerticesPerTriangle) 
 {
     totalVerticesCount = verticesPerRingCount * layerCount;

@@ -1,0 +1,9 @@
+Current vertex ring generation algorythm calculates the vertices unit xy coordinate every time although
+the unit x y values will never change. Only the magnitude of the rings radius changes according to the
+calculations done with the pitch. This is a massive waste of performance : Instead, the unit xy coordinates
+of each vertex can be calculated once and then copied onto every layer after multiplying the radius scalar
+from the pitch calculations. Same with the scaler that is calculated every vertex when it could be 
+calculated once per layer
+
+Currently the ebo generation functions work differently even though they can be recoded to all be a 
+similar algorythm. This would help with readablity and maintainence.
