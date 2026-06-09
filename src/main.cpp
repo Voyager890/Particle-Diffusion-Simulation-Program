@@ -27,17 +27,16 @@
 #include "class_bufferObjects/bufferObjects.h"
 #include "class_particles/particles.h"
 #include "func_proceduralSphere/proceduralSphere.h"
+#include "func_programStartMenu/programStartMenu.h"
+
+#include "debug_tools/debug_tools.h"
 
 int wWidth = 1280;
 int wHeight = 720;
 
-void programInit(int &iVerticesPerRing, float &iRadius);
 
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
-
-void debug_vboDataDisplayer(class_bufferObjects &bufferObjects);
-void debug_eboDataDisplayer(class_bufferObjects &bufferObjects);
 
 int main(){
     // Initialize the required parameters
@@ -68,8 +67,6 @@ int main(){
     glViewport(0, 0, wWidth, wHeight);
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
-    
-    
     
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
     vertexRingGenerator(bufferObjects);    
@@ -140,7 +137,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     
     while(!glfwWindowShouldClose(window)){
@@ -205,61 +202,3 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
 
-void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
-    std::cout << "Vertices Per Ring: " << bufferObjects.verticesPerRingCount << std::endl
-              << "Total Vertices:    " << bufferObjects.totalVerticesCount << std::endl
-              << "Layer Count:       " << bufferObjects.layerCount << std::endl
-              << "Array Capacity:    " << bufferObjects.capacity << std::endl;
-
-    const int elementsPerLayer = bufferObjects.verticesPerRingCount * bufferObjects.stride;
-    for(int element = 0; element < bufferObjects.capacity; element++){
-        if(element % (elementsPerLayer) == 0){
-            std::cout << "\nLayer: " << element / elementsPerLayer << std::endl;
-        }
-
-        if(element % 6 == 0){
-            std::cout << std::endl << bufferObjects.vertices[element] << ", ";
-        }else{
-        std::cout << bufferObjects.vertices[element] << ", ";
-        }
-    }
-
-    std::cout << std:: endl;
-}
-void debug_eboDataDisplayer(class_bufferObjects &bufferObjects){
-    std::cout << "Total Triangles: " << bufferObjects.eboCapacity / bufferObjects.eboVerticesPerTriangle << std::endl
-              << "Total Elements:  " << bufferObjects.eboCapacity << std::endl << std::endl;
-
-    
-    for(int i = 0; i < bufferObjects.eboCapacity; ++i){
-        if(i == bufferObjects.eboElementsPerVertexRing || i == bufferObjects.eboCapacity - bufferObjects.eboElementsPerVertexRing){
-            std::cout << std::endl << "PRIME LAYER: " << std::endl;
-        }
-
-        if(i % 3 == 0){
-            std::cout << std::endl << i / 3 + 1 << " | " << bufferObjects.eboData[i];
-        }else{
-            std::cout << ", " << bufferObjects.eboData[i];
-        } 
-    }
-
-    std::cout << std::endl;
-}
-
-void programInit(int &iVerticesPerRing, float &iRadius){
-    bool entryChoice = false;
-
-    std::cout << "Enter 1 to proceed with manual entry of bufferObjects properties,\n"
-              << "otherwise enter 0 to proceed with te initial properties\n";
-    std::cin >> entryChoice;
-    if (entryChoice){
-        do{
-            std::cout << "Enter the number of vertices per ring, must be a power of 2 greater than 2" << std::endl;
-            std::cin >> iVerticesPerRing;
-        }while(iVerticesPerRing <= 2 || iVerticesPerRing > 0 && ((iVerticesPerRing & (iVerticesPerRing - 1)) != 0)); 
-        
-        std::cout << "Enter the radius of the bufferObjects" << std::endl;
-        std::cin >> iRadius;
-    }
-    return;
-}

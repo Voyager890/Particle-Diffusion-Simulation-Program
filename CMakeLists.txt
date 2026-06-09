@@ -9,12 +9,15 @@ find_package(glfw3 REQUIRED)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_bufferObjects)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_particles)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/func_proceduralSphere)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/debug_tools)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/func_programStartMenu)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/glad)
 
 set(EXECUTABLE_NAME "Diffusion")
 
 add_executable(${EXECUTABLE_NAME}
     src/main.cpp
-    external/glad/glad.c
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
@@ -22,11 +25,14 @@ target_link_libraries(${EXECUTABLE_NAME}
     glfw
     OpenGL::GL
     glm
-    # Custom Classes Libs
+    glad
+    # Custom Libs
     bufferObjects
     particles
-    # Custom Function Libs
+    
+    programStartMenu
     proceduralSphere
+    debug_tools
 )
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE
