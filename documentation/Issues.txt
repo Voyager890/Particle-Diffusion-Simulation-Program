@@ -1,9 +1,19 @@
-Current vertex ring generation algorythm calculates the vertices unit xy coordinate every time although
-the unit x y values will never change. Only the magnitude of the rings radius changes according to the
-calculations done with the pitch. This is a massive waste of performance : Instead, the unit xy coordinates
-of each vertex can be calculated once and then copied onto every layer after multiplying the radius scalar
-from the pitch calculations. Same with the scaler that is calculated every vertex when it could be 
-calculated once per layer
+Currently the vertex buffer object data generator calculates the xy coordinate of each vertices every layer.
+Instead the vertices of one ring can be calculated and assigned onto the rest of the layers. After that, the vertex
+data in each layer can be multiplied with the radius scaler (obtained by pitch trig calc) corresponding to that layer.
+This would help with initialization performance.
 
-Currently the ebo generation functions work differently even though they can be recoded to all be a 
+Since currently the only valid verticesPerRing input are powers of 2. There will be a even number of vertices
+per ring. Since the algorytm calculates spacing between vertices by diving 2 pi radians by vertices per ring, 
+there will be a duplicate set of absaloute values per vertex. So instead of calculating every vertex. The algorythm
+could calculate just half the vertices with the trigomenetric functions. And mirror this half by flipping the 
+sign of the values. This would slightly improve initialization performance. Howver I do not believe this
+slight performance boost is worth the loss of the current algorithms readablity.  
+
+Currently the ebo generation functions work differently even though they can be refactored to all be a 
 similar algorythm. This would help with readablity and maintainence.
+
+Currently the bufferObjects generation functions use unsigned ints or floats. This will cause problems if
+there is a very large number of vertices per ring count. Even thought the graphical fidelity of the spheres
+would not change past a certain value of vertices per ring, The allowance of a value so large is a problem.
+calculate a reasonable threshold and validate inputs. Also use unsigned long long types in the functions.

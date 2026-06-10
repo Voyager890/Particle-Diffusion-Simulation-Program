@@ -18,7 +18,7 @@ class class_bufferObjects {
         unsigned int capacity;
         const float displacementAngle;
         
-        float *vertices;
+        float *vboData;
 
         // Element Buffer Object Properties
         const int eboVerticesPerTriangle;

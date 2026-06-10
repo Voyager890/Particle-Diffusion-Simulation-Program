@@ -25,29 +25,29 @@ void vertexRingGenerator(class_bufferObjects &bufferObjects){
             const int currentVertex = (bufferObjects.stride * step) + (bufferObjects.verticesPerRingCount * bufferObjects.stride * (currentLayer));
 
             // Calculate and scale vertex position to fit the radius bufferObjects
-            bufferObjects.vertices[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
-            bufferObjects.vertices[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
-            bufferObjects.vertices[currentVertex + 2] = sin(pitch) * bufferObjects.radius;    // Z position Attribute
+            bufferObjects.vboData[currentVertex]     = cos(yaw)   * layerRadius;      // X position Attribute    
+            bufferObjects.vboData[currentVertex + 1] = sin(yaw)   * layerRadius;      // Y position Attribute
+            bufferObjects.vboData[currentVertex + 2] = sin(pitch) * bufferObjects.radius;    // Z position Attribute
             
             // Setting the normalized vertex normal data attribute
-            const double vectorLength = std::sqrt(bufferObjects.vertices[currentVertex] * bufferObjects.vertices[currentVertex] 
-                                      + bufferObjects.vertices[currentVertex + 1] * bufferObjects.vertices[currentVertex + 1]
-                                      + bufferObjects.vertices[currentVertex + 2] * bufferObjects.vertices[currentVertex + 2]);
-            bufferObjects.vertices[currentVertex + 3] = bufferObjects.vertices[currentVertex]     / vectorLength;
-            bufferObjects.vertices[currentVertex + 4] = bufferObjects.vertices[currentVertex + 1] / vectorLength;
-            bufferObjects.vertices[currentVertex + 5] = bufferObjects.vertices[currentVertex + 2] / vectorLength;
+            const double vectorLength = std::sqrt(bufferObjects.vboData[currentVertex] * bufferObjects.vboData[currentVertex] 
+                                      + bufferObjects.vboData[currentVertex + 1] * bufferObjects.vboData[currentVertex + 1]
+                                      + bufferObjects.vboData[currentVertex + 2] * bufferObjects.vboData[currentVertex + 2]);
+            bufferObjects.vboData[currentVertex + 3] = bufferObjects.vboData[currentVertex]     / vectorLength;
+            bufferObjects.vboData[currentVertex + 4] = bufferObjects.vboData[currentVertex + 1] / vectorLength;
+            bufferObjects.vboData[currentVertex + 5] = bufferObjects.vboData[currentVertex + 2] / vectorLength;
             
             // Correcting for floating point precision error in angle to radians conversion for basis vector positions
             for(int i = 0; i < 3; ++i){
-                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) < 0.0001 ? 0.0f : bufferObjects.vertices[currentVertex + i]; 
-                bufferObjects.vertices[currentVertex + i] = std::abs(bufferObjects.vertices[currentVertex + i]) > 0.9999 * bufferObjects.radius ? std::copysign(1.0 * bufferObjects.radius, bufferObjects.vertices[currentVertex + i]) : bufferObjects.vertices[currentVertex + i];
+                bufferObjects.vboData[currentVertex + i] = std::abs(bufferObjects.vboData[currentVertex + i]) < 0.0001 ? 0.0f : bufferObjects.vboData[currentVertex + i]; 
+                bufferObjects.vboData[currentVertex + i] = std::abs(bufferObjects.vboData[currentVertex + i]) > 0.9999 * bufferObjects.radius ? std::copysign(1.0 * bufferObjects.radius, bufferObjects.vboData[currentVertex + i]) : bufferObjects.vboData[currentVertex + i];
             }
         }    
     }
     /*
-    What is referred to as prime/primary vertices are the 2 vertices at the top and bottom of 
-    the bufferObjectss generation. They are the only 2 vertices that are alone in their "layer".
-    The layer the prime vertices reside in are not included in the layerCount attribute.
+    What is referred to as prime/primary vboData are the 2 vboData at the top and bottom of 
+    the bufferObjectss generation. They are the only 2 vboData that are alone in their "layer".
+    The layer the prime vboData reside in are not included in the layerCount attribute.
     */
     primaryVertexInit(bufferObjects);
     elementBufferGenerator(bufferObjects);
@@ -57,7 +57,7 @@ void primaryVertexInit(class_bufferObjects &bufferObjects){
     float *newBuffer = new float[bufferObjects.capacity + (2 * bufferObjects.stride)]{0.0f};
 
     const int offset = bufferObjects.stride * 1; // How many starting elements to offset by 
-    for(int i = 0; i < bufferObjects.capacity; ++i){newBuffer[i + offset] = bufferObjects.vertices[i];};
+    for(int i = 0; i < bufferObjects.capacity; ++i){newBuffer[i + offset] = bufferObjects.vboData[i];};
     
     // Position data
     newBuffer[0] = 0.0f * bufferObjects.radius;  
@@ -82,8 +82,8 @@ void primaryVertexInit(class_bufferObjects &bufferObjects){
 
     bufferObjects.totalVerticesCount += 2;
     bufferObjects.capacity = bufferObjects.totalVerticesCount * bufferObjects.stride;
-    delete[] bufferObjects.vertices;
-    bufferObjects.vertices = newBuffer;
+    delete[] bufferObjects.vboData;
+    bufferObjects.vboData = newBuffer;
 }
 
 void elementBufferGenerator(class_bufferObjects &bufferObjects){

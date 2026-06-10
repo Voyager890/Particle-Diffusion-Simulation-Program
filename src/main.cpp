@@ -17,10 +17,10 @@
 #include <glm/trigonometric.hpp>
 #include <glm/geometric.hpp>
 #include <math.h>
-#include <cmath>
 
 #include <new>
 #include <ostream>
+#include <random>
 
 // Custom Libraries
 #include "shaders/class.hpp"
@@ -73,12 +73,11 @@ int main(){
     debug_vboDataDisplayer(bufferObjects);
     debug_eboDataDisplayer(bufferObjects);
 
-    class_particleType particleType_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f);
+    class_particleType particleType_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f, 1.0);
 
     class_particle* particle_Orange[particleType_Orange.particleCount]; 
     for(int i = 0; i < particleType_Orange.particleCount; i++){
-        particle_Orange[i] = new class_particle;
-        particle_Orange[i]->particleTypeLink = &particleType_Orange;
+        particle_Orange[i] = new class_particle(particleType_Orange);
     }
 
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
@@ -127,7 +126,7 @@ int main(){
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vboData, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
 

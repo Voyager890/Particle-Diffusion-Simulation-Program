@@ -15,12 +15,12 @@ eboElementsPerVertexRing(verticesPerRingCount * eboVerticesPerTriangle)
     totalVerticesCount = verticesPerRingCount * layerCount;
     capacity = totalVerticesCount * stride;
 
-    vertices = new float [capacity]{};
+    vboData = new float [capacity]{};
     eboData  = new unsigned int [capacity]{};
 
 }
 
 class_bufferObjects::~class_bufferObjects(){
-    delete [] vertices;
+    delete [] vboData;
     delete [] eboData;
 }

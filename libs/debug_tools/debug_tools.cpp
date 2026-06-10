@@ -15,9 +15,9 @@ void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
         }
 
         if(element % 6 == 0){
-            std::cout << std::endl << bufferObjects.vertices[element] << ", ";
+            std::cout << std::endl << bufferObjects.vboData[element] << ", ";
         }else{
-        std::cout << bufferObjects.vertices[element] << ", ";
+        std::cout << bufferObjects.vboData[element] << ", ";
         }
     }
 
