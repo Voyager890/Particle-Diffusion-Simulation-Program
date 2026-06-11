@@ -1,19 +1,23 @@
-Currently the vertex buffer object data generator calculates the xy coordinate of each vertices every layer.
+Currently the vertex buffer object data generator calculates the x and y coordinate of each vertex every layer.
 Instead the vertices of one ring can be calculated and assigned onto the rest of the layers. After that, the vertex
 data in each layer can be multiplied with the radius scaler (obtained by pitch trig calc) corresponding to that layer.
-This would help with initialization performance.
+This would help with program start time especially if many verticesPerRing or particle types are used.
 
 Since currently the only valid verticesPerRing input are powers of 2. There will be a even number of vertices
 per ring. Since the algorytm calculates spacing between vertices by diving 2 pi radians by vertices per ring, 
 there will be a duplicate set of absaloute values per vertex. So instead of calculating every vertex. The algorythm
 could calculate just half the vertices with the trigomenetric functions. And mirror this half by flipping the 
-sign of the values. This would slightly improve initialization performance. Howver I do not believe this
-slight performance boost is worth the loss of the current algorithms readablity.  
+sign of the values. This would slightly improve program start time especially if many verticesPerRings were
+input or particle types are used. Howver I do not believe this performance boost is worth the loss of the current 
+algorithms readablity.  
 
 Currently the ebo generation functions work differently even though they can be refactored to all be a 
-similar algorythm. This would help with readablity and maintainence.
+similar algorythm. This would help with readablity.
 
 Currently the bufferObjects generation functions use unsigned ints or floats. This will cause problems if
-there is a very large number of vertices per ring count. Even thought the graphical fidelity of the spheres
+there is a very large number of vertices per ring count. Even though the graphical fidelity of the spheres
 would not change past a certain value of vertices per ring, The allowance of a value so large is a problem.
-calculate a reasonable threshold and validate inputs. Also use unsigned long long types in the functions.
+calculate a reasonable threshold and validate inputs. Also use unsigned long long/double types in the functions.
+
+During developement, not much care was given to freeing dynamically allocated memory. Thus memory
+leaks may occur.

@@ -42,6 +42,7 @@ int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
     float iRadius = 1.0f;
+
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
 
@@ -68,31 +69,40 @@ int main(){
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
     
+    
+    // bufferObjects Initializaiton
     class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
-    vertexRingGenerator(bufferObjects);    
-    debug_vboDataDisplayer(bufferObjects);
-    debug_eboDataDisplayer(bufferObjects);
+    vertexRingGenerator(bufferObjects);
 
-    class_particleType particleType_Orange(bufferObjects, glm::vec3(0.8f, 0.5f, 0.0f), 10.0f, 1.0);
+    // Particle class initialization
 
-    class_particle* particle_Orange[particleType_Orange.particleCount]; 
-    for(int i = 0; i < particleType_Orange.particleCount; i++){
-        particle_Orange[i] = new class_particle(particleType_Orange);
+    long Count_particleType = 2; 
+    glm::vec3 particleType_ObjectColor[2]; // Currently hard coded
+    particleType_ObjectColor[1] = glm::vec3(0.8f, 0.2f, 0.0f); 
+    particleType_ObjectColor[0] = glm::vec3(0.0f, 0.2f, 0.8f);
+
+    class_particleType** particleTypePointer = nullptr;
+    particleTypePointer = new class_particleType*[Count_particleType];
+    
+    for(int i = 0; i < Count_particleType; i++){
+        particleTypePointer[i] = new class_particleType(particleType_ObjectColor[i], 1.0f, 1.0f, 3);
     }
 
+    // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
     glm::mat4 cameraInit = glm::mat4(1.0f);
     glm::vec3 cameraPosition(0.0f, 0.0f, -6.0f);
     cameraInit = glm::translate(cameraInit, cameraPosition);
-    
-    
+    glm::mat4 positionMatrix = glm::mat4(1.0f);
+    positionMatrix = glm::translate(positionMatrix, particleTypePointer[0]->particle[0].position);
+
     Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
     shader_standarad.use();
-    shader_standarad.setMat4("motion", particle_Orange[0]->position);
+    shader_standarad.setMat4("motion", positionMatrix);
     shader_standarad.setMat4("camera", cameraInit);
     shader_standarad.setMat4("projection", projectionMatrix);
 
-    shader_standarad.setVec3("objectColor", particleType_Orange.objectColor);
+    shader_standarad.setVec3("objectColor", particleTypePointer[0]->objectColor);
     shader_standarad.setVec3("lightColor", lightColor);
     shader_standarad.setVec3("lightPos", lightSourceOrigin);
     
@@ -104,6 +114,8 @@ int main(){
     shader_lightSource.setMat4("camera", cameraInit);
     shader_lightSource.setMat4("projection", projectionMatrix);
 
+
+    // Light source buffer object initialzation
     float lightSourceVertices[] = {0.0f, 1.0f, 0.0f,    1.0f,-0.5f,0.0f,    -1.0f,-0.5f,0.0f};
     unsigned int lightSourceVBO, lightSourceVAO;
 
@@ -117,23 +129,29 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int vbo, vao, ebo;
-
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
+    // Particle types buffer objects initalization    
+    unsigned int ebo;
     glGenBuffers(1, &ebo);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vboData, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
+    
+    for(int i = 0; i < Count_particleType; i++){
+    glGenBuffers(1, &particleTypePointer[i]->vertexBufferObject);
+    glGenVertexArrays(1, &particleTypePointer[i]->vertexArrayObject);
+    
+    glBindVertexArray(particleTypePointer[i]->vertexArrayObject);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, bufferObjects.stride * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[i]->vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vboData, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, bufferObjects.stride * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
+
 
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
@@ -141,18 +159,25 @@ int main(){
     
     while(!glfwWindowShouldClose(window)){
         int current = 0; 
-        inputCheck(window, particle_Orange[current]->position);
+        inputCheck(window, positionMatrix);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        glBindVertexArray(vao);
-        
-        for(int i = 0; i < particleType_Orange.particleCount; i++){
-            shader_standarad.setMat4("motion", particle_Orange[i]->position);
+        for(int j = 0; j < Count_particleType; j++){
+            glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
+            glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[j]->vertexBufferObject);
+            shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
+
+            for(int i = 0; i < particleTypePointer[0]->particleCount; i++){
+            positionMatrix = glm::mat4(1.0f);
+            positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
+            shader_standarad.setMat4("motion", positionMatrix);
             glDrawElements(GL_TRIANGLES, bufferObjects.eboCapacity, GL_UNSIGNED_INT, 0);
+            }
         }
+        
 
         shader_lightSource.use();
         glBindVertexArray(lightSourceVAO);
@@ -164,6 +189,11 @@ int main(){
         glfwPollEvents();
     }
 
+    // Clean up
+    for(int i = 0; i < Count_particleType; i++){
+        delete [] particleTypePointer[i];
+    }
+    delete [] particleTypePointer;
 
     glfwTerminate();
     return 0;

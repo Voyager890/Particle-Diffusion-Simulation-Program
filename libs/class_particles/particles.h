@@ -1,28 +1,36 @@
 #ifndef PARTICLES
 #define PARTICLES
 
+#include <string>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 
-#include "class_bufferObjects/bufferObjects.h"
+
+class class_particle{
+    public:
+    glm::vec3 velocity;
+    glm::vec3 position;
+
+    class_particle();
+};
+
+
 
 class class_particleType {
     public:
-    class_particleType(class_bufferObjects &bufferObjectLink, glm::vec3 objectColor, float mass, float particleRadius);
+    std::string particleName;
 
-    const class_bufferObjects* bufferObjectLink;
-    const glm::vec3 objectColor;
-    const float mass;
-    const float particleRadius;
+    class_particleType(glm::vec3 objectColor, float mass, float particleRadius, long particleCount);
+    ~class_particleType();
+    
+    glm::vec3 objectColor;
+    float mass;
+    float particleRadius;
 
-    int particleCount;
-};
-class class_particle{
-    public:
-    class_particle(class_particleType &particleTypeLink);
+    unsigned int vertexBufferObject;
+    unsigned int vertexArrayObject;
 
-    const class_particleType* particleTypeLink;
-    glm::vec3 velocity;
-    glm::mat4 position;
+    long particleCount;
+    class_particle* particle;
 };
 #endif
