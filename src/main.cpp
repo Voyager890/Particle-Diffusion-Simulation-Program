@@ -76,7 +76,7 @@ int main(){
     particleTypePointer = new class_particleType*[2];
     std::cout << "Currently in the value thing " << programInitHelper->count_particleTypes << std::endl; 
     for(int i = 0; i < programInitHelper->count_particleTypes; i++){
-        particleTypePointer[i] = new class_particleType(programInitHelper->color[i], 1.0f, 1.0f, 3); // ISSUE IS HERE
+        particleTypePointer[i] = new class_particleType(programInitHelper->name[i], programInitHelper->color[i], programInitHelper->mass[i], programInitHelper->radius[i], programInitHelper->particleCount[i]);
     }
 
     // Shaders Initialization
@@ -190,10 +190,10 @@ int main(){
     }
 
     // Clean up
-    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
-        delete [] particleTypePointer[i];
-    }
-    delete particleTypePointer;
+    // for(int i = 0; i < programInitHelper->count_particleTypes; i++){
+    //     delete [] particleTypePointer[i];
+    // }
+    delete [] particleTypePointer;
 
     glfwTerminate();
     return 0;

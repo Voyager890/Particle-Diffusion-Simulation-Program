@@ -19,13 +19,13 @@ class class_particle{
 class class_particleType {
     public:
     
-    class_particleType(glm::vec3 objectColor, float mass, float particleRadius, long particleCount);
+    class_particleType(std::string particleName, glm::vec3 objectColor, float mass, float particleRadius, long particleCount);
     ~class_particleType();
     
-    std::string particleName;
-    glm::vec3 objectColor;
-    float mass;
-    float particleRadius;
+    const std::string particleName;
+    const glm::vec3 objectColor;
+    const float mass;
+    const float particleRadius;
 
     unsigned int vertexBufferObject;
     unsigned int vertexArrayObject;

@@ -4,7 +4,7 @@
 #include <glm/ext/vector_float3.hpp>
 #include <iostream>
 void programInit(class_programInitHelper*& programInitHelper){
-    if(1){
+    if(!1){
         defaultInit(programInitHelper);
     }else{
         long count_particleTypes = 0;
@@ -13,14 +13,15 @@ void programInit(class_programInitHelper*& programInitHelper){
         if(programInitHelper == nullptr){std::cout << "ProgranInitHelper Failed to get assigned a object\n";}
 
         for(int i = 0; i < count_particleTypes; i++){
-            std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   programInitHelper->name[i]; std::cout << std::endl;
-            std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   programInitHelper->mass[i]; std::cout << std::endl;
-            std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> programInitHelper->radius[i]; std::cout << std::endl;
+            std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   programInitHelper->name[i]; 
+            std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   programInitHelper->mass[i]; 
+            std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> programInitHelper->radius[i]; 
+            std::cout << "Particle " << i + 1 << " Amount: "; std::cin >> programInitHelper->particleCount[i]; 
         
             std::cout << "Particle's RGB Color" << std::endl;
-            std::cout << "Particle " << i + 1 << " R: "; std::cin >> programInitHelper->color[i].x; std::cout << std::endl;
-            std::cout << "Particle " << i + 1 << " G: "; std::cin >> programInitHelper->color[i].y; std::cout << std::endl;
-        std::cout << "Particle " << i + 1 << " B: "; std::cin >> programInitHelper->color[i].z; std::cout << std::endl;
+            std::cout << "Particle " << i + 1 << " R: "; std::cin >> programInitHelper->color[i].x;
+            std::cout << "Particle " << i + 1 << " G: "; std::cin >> programInitHelper->color[i].y;
+            std::cout << "Particle " << i + 1 << " B: "; std::cin >> programInitHelper->color[i].z;
         }
     }
 

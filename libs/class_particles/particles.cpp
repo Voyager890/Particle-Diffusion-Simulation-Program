@@ -17,7 +17,8 @@ class_particle::class_particle()
 
 
 
-class_particleType::class_particleType(glm::vec3 objectColor, float mass, float particleRadius, long particleCount):
+class_particleType::class_particleType(std::string particleName, glm::vec3 objectColor, float mass, float particleRadius, long particleCount):
+particleName(particleName),
 objectColor(objectColor),
 mass(mass),
 particleRadius(particleRadius),

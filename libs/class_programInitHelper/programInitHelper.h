@@ -14,6 +14,7 @@ public:
     std::string* name;
     float* mass;
     float* radius;
+    float* particleCount;
     glm::vec3* color;
 };
 
