@@ -2,8 +2,8 @@
 #include "glad/glad.h"
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
-
 #include <GL/gl.h>
+
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
@@ -20,12 +20,12 @@
 
 #include <new>
 #include <ostream>
-#include <random>
 
 // Custom Libraries
 #include "shaders/class.hpp"
 #include "class_bufferObjects/bufferObjects.h"
 #include "class_particles/particles.h"
+#include "class_programInitHelper/programInitHelper.h"
 #include "func_proceduralSphere/proceduralSphere.h"
 #include "func_programStartMenu/programStartMenu.h"
 
@@ -34,19 +34,19 @@
 int wWidth = 1280;
 int wHeight = 720;
 
-
 void inputCheck(GLFWwindow* window, glm::mat4& matrix);
 void resize_callback(GLFWwindow* window,int width, int height);
 
 int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
-    float iRadius = 1.0f;
-
+    
+    class_programInitHelper* programInitHelper = nullptr;
+    programInit(programInitHelper);
+    if(programInitHelper == nullptr){std::cout << "Failed to initialize programInitHelper object\n";return -1;}
+    
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
-
-    programInit(iVerticesPerRing, iRadius);
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -72,16 +72,11 @@ int main(){
     
     // Particle class initialization
 
-    long Count_particleType = 2; 
-    glm::vec3 particleType_ObjectColor[2]; // Currently hard coded
-    particleType_ObjectColor[1] = glm::vec3(0.8f, 0.2f, 0.0f); 
-    particleType_ObjectColor[0] = glm::vec3(0.0f, 0.2f, 0.8f);
-
     class_particleType** particleTypePointer = nullptr;
     particleTypePointer = new class_particleType*[2];
-    
-    for(int i = 0; i < Count_particleType; i++){
-        particleTypePointer[i] = new class_particleType(particleType_ObjectColor[i], 1.0f, 1.0f, 3);
+    std::cout << "Currently in the value thing " << programInitHelper->count_particleTypes << std::endl; 
+    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
+        particleTypePointer[i] = new class_particleType(programInitHelper->color[i], 1.0f, 1.0f, 3); // ISSUE IS HERE
     }
 
     // Shaders Initialization
@@ -131,7 +126,7 @@ int main(){
     vertexRingGenerator(bufferObjects);
 
     unsigned int ebo;
-    for(int i = 0; i < Count_particleType; i++){
+    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
     class_bufferObjects bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
     vertexRingGenerator(bufferObjects);
 
@@ -170,7 +165,7 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        for(int j = 0; j < Count_particleType; j++){
+        for(int j = 0; j < programInitHelper->count_particleTypes; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[j]->vertexBufferObject);
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
@@ -195,10 +190,10 @@ int main(){
     }
 
     // Clean up
-    for(int i = 0; i < Count_particleType; i++){
+    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
         delete [] particleTypePointer[i];
     }
-    delete [] particleTypePointer;
+    delete particleTypePointer;
 
     glfwTerminate();
     return 0;

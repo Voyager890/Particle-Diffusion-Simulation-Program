@@ -18,11 +18,11 @@ class class_particle{
 
 class class_particleType {
     public:
-    std::string particleName;
-
+    
     class_particleType(glm::vec3 objectColor, float mass, float particleRadius, long particleCount);
     ~class_particleType();
     
+    std::string particleName;
     glm::vec3 objectColor;
     float mass;
     float particleRadius;

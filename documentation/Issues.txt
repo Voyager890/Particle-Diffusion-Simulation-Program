@@ -20,4 +20,5 @@ would not change past a certain value of vertices per ring, The allowance of a v
 calculate a reasonable threshold and validate inputs. Also use unsigned long long/double types in the functions.
 
 During developement, not much care was given to freeing dynamically allocated memory. Thus memory
-leaks may occur.
+leaks may occur. For example, the particleType class pointer pointer object may not be cleaned up
+properly.
