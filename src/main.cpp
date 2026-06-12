@@ -70,10 +70,6 @@ int main(){
     glfwSetFramebufferSizeCallback(window, resize_callback);
     
     
-    // bufferObjects Initializaiton
-    class_bufferObjects bufferObjects(iVerticesPerRing, iRadius);
-    vertexRingGenerator(bufferObjects);
-
     // Particle class initialization
 
     long Count_particleType = 2; 
@@ -82,7 +78,7 @@ int main(){
     particleType_ObjectColor[0] = glm::vec3(0.0f, 0.2f, 0.8f);
 
     class_particleType** particleTypePointer = nullptr;
-    particleTypePointer = new class_particleType*[Count_particleType];
+    particleTypePointer = new class_particleType*[2];
     
     for(int i = 0; i < Count_particleType; i++){
         particleTypePointer[i] = new class_particleType(particleType_ObjectColor[i], 1.0f, 1.0f, 3);
@@ -129,13 +125,22 @@ int main(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Particle types buffer objects initalization    
+    // Particle types buffer objects initalization (ebo is shared)
+
+    class_bufferObjects bufferObjects(iVerticesPerRing, particleTypePointer[0]->particleRadius);
+    vertexRingGenerator(bufferObjects);
+
     unsigned int ebo;
+    for(int i = 0; i < Count_particleType; i++){
+    class_bufferObjects bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
+    vertexRingGenerator(bufferObjects);
+
+    if(i == 0){ 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
-    
-    for(int i = 0; i < Count_particleType; i++){
+    }
+
     glGenBuffers(1, &particleTypePointer[i]->vertexBufferObject);
     glGenVertexArrays(1, &particleTypePointer[i]->vertexArrayObject);
     
@@ -150,7 +155,7 @@ int main(){
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-}
+    }
 
 
 
