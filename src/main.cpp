@@ -23,9 +23,9 @@
 
 // Custom Libraries
 #include "shaders/class.hpp"
-#include "class_bufferObjects/bufferObjects.h"
+#include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 #include "class_particles/particles.h"
-#include "class_programInitHelper/programInitHelper.h"
+#include "class_particleInitHelper/particleInitHelper.h"
 #include "func_proceduralSphere/proceduralSphere.h"
 #include "func_programStartMenu/programStartMenu.h"
 
@@ -41,9 +41,9 @@ int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
     
-    class_programInitHelper* programInitHelper = nullptr;
-    programInit(programInitHelper);
-    if(programInitHelper == nullptr){std::cout << "Failed to initialize programInitHelper object\n";return -1;}
+    class_particleInitHelper* particleInitHelper = nullptr;
+    programInit(particleInitHelper);
+    if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object\n";return -1;}
     
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
@@ -74,8 +74,8 @@ int main(){
 
     class_particleType** particleTypePointer = nullptr;
     particleTypePointer = new class_particleType*[2];
-    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
-        particleTypePointer[i] = new class_particleType(programInitHelper->name[i], programInitHelper->color[i], programInitHelper->mass[i], programInitHelper->radius[i], programInitHelper->particleCount[i]);
+    for(int i = 0; i < particleInitHelper->count_particleTypes; i++){
+        particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
     }
 
     // Shaders Initialization
@@ -121,12 +121,12 @@ int main(){
 
     // Particle types buffer objects initalization (ebo is shared)
 
-    class_bufferObjects bufferObjects(iVerticesPerRing, particleTypePointer[0]->particleRadius);
-    vertexRingGenerator(bufferObjects);
+    class_bufferObjectsInitHelper bufferObjectsInitHelper(iVerticesPerRing, particleTypePointer[0]->particleRadius);
+    vertexRingGenerator(bufferObjectsInitHelper);
 
     unsigned int ebo;
-    for(int i = 0; i < programInitHelper->count_particleTypes; i++){
-    class_bufferObjects bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
+    for(int i = 0; i < particleInitHelper->count_particleTypes; i++){
+    class_bufferObjectsInitHelper bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
     vertexRingGenerator(bufferObjects);
 
     if(i == 0){ 
@@ -164,7 +164,7 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        for(int j = 0; j < programInitHelper->count_particleTypes; j++){
+        for(int j = 0; j < particleInitHelper->count_particleTypes; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[j]->vertexBufferObject);
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
@@ -173,7 +173,7 @@ int main(){
             positionMatrix = glm::mat4(1.0f);
             positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
             shader_standarad.setMat4("motion", positionMatrix);
-            glDrawElements(GL_TRIANGLES, bufferObjects.eboCapacity, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
             }
         }
         

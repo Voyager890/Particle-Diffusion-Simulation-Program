@@ -8,6 +8,6 @@ target_include_directories(programStartMenu PRIVATE
 
 target_link_libraries(programStartMenu PRIVATE
     glm
-    programInitHelper
+    particleInitHelper
 )
 

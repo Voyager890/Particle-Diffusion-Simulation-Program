@@ -7,5 +7,5 @@ target_include_directories(proceduralSphere PRIVATE
 )
 target_link_libraries(proceduralSphere PRIVATE
     glm
-    bufferObjects
+    bufferObjectsInitHelper
 )

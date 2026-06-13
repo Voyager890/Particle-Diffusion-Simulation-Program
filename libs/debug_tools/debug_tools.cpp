@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include "debug_tools.h"
-#include "class_bufferObjects/bufferObjects.h"
-void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
+#include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
+void debug_vboDataDisplayer(class_bufferObjectsInitHelper &bufferObjects){
     std::cout << "Vertices Per Ring: " << bufferObjects.verticesPerRingCount << std::endl
               << "Total Vertices:    " << bufferObjects.totalVerticesCount << std::endl
               << "Layer Count:       " << bufferObjects.layerCount << std::endl
@@ -23,7 +23,7 @@ void debug_vboDataDisplayer(class_bufferObjects &bufferObjects){
 
     std::cout << std:: endl;
 }
-void debug_eboDataDisplayer(class_bufferObjects &bufferObjects){
+void debug_eboDataDisplayer(class_bufferObjectsInitHelper &bufferObjects){
     std::cout << "Total Triangles: " << bufferObjects.eboCapacity / bufferObjects.eboVerticesPerTriangle << std::endl
               << "Total Elements:  " << bufferObjects.eboCapacity << std::endl << std::endl;
 

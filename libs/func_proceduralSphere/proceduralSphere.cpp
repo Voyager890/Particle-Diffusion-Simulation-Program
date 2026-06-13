@@ -11,11 +11,11 @@
 #include <math.h>
 #include <cmath>
 
-#include "class_bufferObjects/bufferObjects.h"
+#include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 
 #include "proceduralSphere.h"
 
-void vertexRingGenerator(class_bufferObjects &bufferObjects){
+void vertexRingGenerator(class_bufferObjectsInitHelper &bufferObjects){
     for(int currentLayer = 0; currentLayer < bufferObjects.layerCount; currentLayer++){
         const float pitch = glm::radians(90.0 - ((currentLayer + 1) * bufferObjects.displacementAngle));
         const float layerRadius = (cos(pitch) * bufferObjects.radius); 
@@ -53,7 +53,7 @@ void vertexRingGenerator(class_bufferObjects &bufferObjects){
     elementBufferGenerator(bufferObjects);
 }
 
-void primaryVertexInit(class_bufferObjects &bufferObjects){
+void primaryVertexInit(class_bufferObjectsInitHelper &bufferObjects){
     float *newBuffer = new float[bufferObjects.capacity + (2 * bufferObjects.stride)]{0.0f};
 
     const int offset = bufferObjects.stride * 1; // How many starting elements to offset by 
@@ -86,7 +86,7 @@ void primaryVertexInit(class_bufferObjects &bufferObjects){
     bufferObjects.vboData = newBuffer;
 }
 
-void elementBufferGenerator(class_bufferObjects &bufferObjects){
+void elementBufferGenerator(class_bufferObjectsInitHelper &bufferObjects){
     // Initialize first prime's element data
     bufferObjects.eboData[0] = 0;
     bufferObjects.eboData[1] = 1;      

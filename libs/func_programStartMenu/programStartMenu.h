@@ -1,8 +1,8 @@
 #ifndef PROGRAM_START_MENU
 #define PROGRAM_START_MENU
 
-#include "class_programInitHelper/programInitHelper.h"
+#include "class_particleInitHelper/particleInitHelper.h"
 
-void programInit(class_programInitHelper*& programInitHelper);
-void defaultInit(class_programInitHelper*& programInitHelper);
+void programInit(class_particleInitHelper*& particleInitHelper);
+void defaultInit(class_particleInitHelper*& particleInitHelper);
 #endif

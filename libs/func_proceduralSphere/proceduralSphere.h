@@ -1,10 +1,10 @@
 #ifndef PROCEDURAL_SPHERE
 #define PROCEDURAL_SPHERE
 
-#include "class_bufferObjects/bufferObjects.h"
+#include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 
-void vertexRingGenerator(class_bufferObjects &bufferObjects);
-void primaryVertexInit(class_bufferObjects &bufferObjects);
-void elementBufferGenerator(class_bufferObjects &bufferObjects);
+void vertexRingGenerator(class_bufferObjectsInitHelper &bufferObjects);
+void primaryVertexInit(class_bufferObjectsInitHelper &bufferObjects);
+void elementBufferGenerator(class_bufferObjectsInitHelper &bufferObjects);
 
 #endif
