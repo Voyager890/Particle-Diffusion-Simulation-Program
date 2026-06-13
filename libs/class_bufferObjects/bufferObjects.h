@@ -1,6 +1,11 @@
 #ifndef BUFFER_OBJECTS
 #define BUFFER_OBJECTS
 
+/*
+    A class that helps in the vertex buffer object data generation
+    by providing some constants that describe properties the sphere has
+    all under one class, keeping this organized and readable.
+*/
 class class_bufferObjects {
     public:
         const unsigned int stride; // Number of attributes per vertex 

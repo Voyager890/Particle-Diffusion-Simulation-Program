@@ -1,21 +1,39 @@
 #include "programStartMenu.h"
 
+#include "class_programInitHelper/programInitHelper.h"
+#include <glm/ext/vector_float3.hpp>
 #include <iostream>
-void programInit(int &iVerticesPerRing, float &iRadius){
-    bool entryChoice = false;
+void programInit(class_programInitHelper*& programInitHelper){
+    if(!1){
+        defaultInit(programInitHelper);
+    }else{
+        long count_particleTypes = 0;
+        std::cout << "Number of types of particles: "; std::cin >> count_particleTypes;
+        programInitHelper = new class_programInitHelper(count_particleTypes);
+        if(programInitHelper == nullptr){std::cout << "ProgranInitHelper Failed to get assigned a object\n";}
 
-    std::cout << "Enter 1 to proceed with manual entry of bufferObjects properties,\n"
-              << "otherwise enter 0 to proceed with te initial properties\n";
-    std::cin >> entryChoice;
-    if (entryChoice){
-        do{
-            std::cout << "Enter the number of vertices per ring, must be a power of 2 greater than 2" << std::endl;
-            std::cin >> iVerticesPerRing;
-        }while(iVerticesPerRing <= 2 || iVerticesPerRing > 0 && ((iVerticesPerRing & (iVerticesPerRing - 1)) != 0)); 
+        for(int i = 0; i < count_particleTypes; i++){
+            std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   programInitHelper->name[i]; 
+            std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   programInitHelper->mass[i]; 
+            std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> programInitHelper->radius[i]; 
+            std::cout << "Particle " << i + 1 << " Amount: "; std::cin >> programInitHelper->particleCount[i]; 
         
-        std::cout << "Enter the radius of the bufferObjects" << std::endl;
-        std::cin >> iRadius;
+            std::cout << "Particle's RGB Color" << std::endl;
+            std::cout << "Particle " << i + 1 << " R: "; std::cin >> programInitHelper->color[i].x;
+            std::cout << "Particle " << i + 1 << " G: "; std::cin >> programInitHelper->color[i].y;
+            std::cout << "Particle " << i + 1 << " B: "; std::cin >> programInitHelper->color[i].z;
+        }
     }
-    return;
+
 }
 
+void defaultInit(class_programInitHelper*& programInitHelper){
+    long count_particleTypes = 1;
+    programInitHelper = new class_programInitHelper(count_particleTypes);
+
+    programInitHelper->name[0] = "Defualt";
+    programInitHelper->mass[0] = 1.0f;
+    programInitHelper->radius[0] = 1.0f;
+    programInitHelper->color[0] = glm::vec3(1.0f);
+
+}
