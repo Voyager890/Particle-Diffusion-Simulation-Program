@@ -42,7 +42,7 @@ int main(){
     int iVerticesPerRing = 32;
     
     class_particleInitHelper* particleInitHelper = nullptr;
-    programInit(particleInitHelper);
+    size_t particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
     if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object\n";return -1;}
     
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   

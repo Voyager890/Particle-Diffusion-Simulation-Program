@@ -3,6 +3,8 @@
 
 #include "class_particleInitHelper/particleInitHelper.h"
 
-void programInit(class_particleInitHelper*& particleInitHelper);
-void defaultInit(class_particleInitHelper*& particleInitHelper);
+size_t programInit(class_particleInitHelper*& particleInitHelper);
+size_t defaultInit(class_particleInitHelper*& particleInitHelper);
+
+void rgbInput(glm::vec3& color);
 #endif

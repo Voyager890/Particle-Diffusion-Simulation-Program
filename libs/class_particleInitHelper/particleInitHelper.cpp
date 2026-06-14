@@ -3,8 +3,7 @@
 #include "glm/ext/vector_float3.hpp"
 #include <string>
 
-class_particleInitHelper::class_particleInitHelper(long& count_particleTypes):
-count_particleTypes(count_particleTypes)
+class_particleInitHelper::class_particleInitHelper(size_t& count_particleTypes)
 {
     name   = new std::string[count_particleTypes];
     color  = new glm::vec3[count_particleTypes];
