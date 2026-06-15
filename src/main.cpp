@@ -40,9 +40,10 @@ void resize_callback(GLFWwindow* window,int width, int height);
 int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
+    float borderArea = 10000;
     
     class_particleInitHelper* particleInitHelper = nullptr;
-    size_t particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
+    int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
     if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object\n";return -1;}
     
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
@@ -74,7 +75,7 @@ int main(){
 
     class_particleType** particleTypePointer = nullptr;
     particleTypePointer = new class_particleType*[2];
-    for(int i = 0; i < particleInitHelper->count_particleTypes; i++){
+    for(int i = 0; i < particleTypesAmount; i++){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
     }
 
@@ -125,7 +126,7 @@ int main(){
     vertexRingGenerator(bufferObjectsInitHelper);
 
     unsigned int ebo;
-    for(int i = 0; i < particleInitHelper->count_particleTypes; i++){
+    for(int i = 0; i < particleTypesAmount; i++){
     class_bufferObjectsInitHelper bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
     vertexRingGenerator(bufferObjects);
 
@@ -164,7 +165,7 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         shader_standarad.use();
-        for(int j = 0; j < particleInitHelper->count_particleTypes; j++){
+        for(int j = 0; j < particleTypesAmount; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[j]->vertexBufferObject);
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
