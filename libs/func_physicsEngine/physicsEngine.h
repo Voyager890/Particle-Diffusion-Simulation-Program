@@ -3,8 +3,9 @@
 
 #include "class_particles/particles.h"
 
-void physicsEngine(class_particleType**& particleTypePointer, const int particleTypesAmount);
+void physicsEngine(class_particleType**& particleTypePointer, const int& particleTypesAmount);
 
-bool isColliding(class_particle& subjectParticle, class_particle& possibleCollisionParticle);
-bool isPastBoundry(class_particle& particle, const double& borderDisplacement);
+void particleCollisionHandler(class_particle& particle, const class_particleType**& particleTypePointer, const int particleTypesAmount);
+void borderCollisionHandler(class_particle& particle, const double& borderDisplacement);
+
 #endif

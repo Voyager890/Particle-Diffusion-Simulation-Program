@@ -5,10 +5,10 @@
 #include <glm/ext/vector_float3.hpp>
 #include <iostream>
 size_t programInit(class_particleInitHelper*& particleInitHelper){
+    size_t count_particleTypes = 0;
     if(!1){
         defaultInit(particleInitHelper); // Temporary test option 
     }else{
-        size_t count_particleTypes = 0;
         std::cout << "Number of types of particles: "; std::cin >> count_particleTypes;
         particleInitHelper = new class_particleInitHelper(count_particleTypes);
         if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper Failed to get assigned a object\n";}
@@ -24,10 +24,9 @@ size_t programInit(class_particleInitHelper*& particleInitHelper){
             std::cout << "Particle " << i + 1 << " G: "; std::cin >> particleInitHelper->color[i].y;
             std::cout << "Particle " << i + 1 << " B: "; std::cin >> particleInitHelper->color[i].z;
             
-            return count_particleTypes;
         }
     }
-
+    return count_particleTypes;
 }
 
 size_t defaultInit(class_particleInitHelper*& particleInitHelper){
