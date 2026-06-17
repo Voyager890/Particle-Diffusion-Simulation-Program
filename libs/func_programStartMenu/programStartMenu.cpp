@@ -6,12 +6,11 @@
 #include <iostream>
 size_t programInit(class_particleInitHelper*& particleInitHelper){
     size_t count_particleTypes = 0;
-    if(!1){
-        defaultInit(particleInitHelper); // Temporary test option 
-    }else{
-        std::cout << "Number of types of particles: "; std::cin >> count_particleTypes;
+    std::cout << "Number of types of particles: "; std::cin >> count_particleTypes;
+    
+    if(count_particleTypes != 0){
         particleInitHelper = new class_particleInitHelper(count_particleTypes);
-        if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper Failed to get assigned a object\n";}
+        if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper failed to be instantiated in programInit\n";}
 
         for(int i = 0; i < count_particleTypes; i++){
             std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   particleInitHelper->name[i]; 
@@ -25,21 +24,34 @@ size_t programInit(class_particleInitHelper*& particleInitHelper){
             std::cout << "Particle " << i + 1 << " B: "; std::cin >> particleInitHelper->color[i].z;
             
         }
+    }else{
+        count_particleTypes = defaultInit(particleInitHelper); // Temporary test option 
     }
     return count_particleTypes;
 }
 
 size_t defaultInit(class_particleInitHelper*& particleInitHelper){
-    size_t count_particleTypes = 1;
+    size_t count_particleTypes = 2;
     particleInitHelper = new class_particleInitHelper(count_particleTypes);
+    if(particleInitHelper == nullptr){std::cout << "ProgramInitHelper failed to instantiate in defaultInit\n";}
 
-    particleInitHelper->name[0] = "Defualt";
+    particleInitHelper->name[0] = "Defualt Red";
     particleInitHelper->mass[0] = 1.0f;
-    particleInitHelper->radius[0] = 1.0f;
-    particleInitHelper->color[0] = glm::vec3(1.0f);
-
+    particleInitHelper->radius[0] = 0.2f;
+    particleInitHelper->color[0].x = 0.7f;
+    particleInitHelper->color[0].y = 0.2f;
+    particleInitHelper->color[0].z = 0.0f;
+    particleInitHelper->particleCount[0] = 5;
+    
+    particleInitHelper->name[1] = "Defualt Blue";
+    particleInitHelper->mass[1] = 1.0f;
+    particleInitHelper->radius[1] = 0.2f;
+    particleInitHelper->color[1].x = 0.1f;
+    particleInitHelper->color[1].y = 0.1f;
+    particleInitHelper->color[1].z = 0.8f;
+    particleInitHelper->particleCount[1] = 5;
+    
     return count_particleTypes;
-
 }
 
 void rgbInput(glm::vec3& color){

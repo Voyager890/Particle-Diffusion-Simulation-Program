@@ -28,6 +28,7 @@
 #include "class_particleInitHelper/particleInitHelper.h"
 #include "func_proceduralSphere/proceduralSphere.h"
 #include "func_programStartMenu/programStartMenu.h"
+#include "func_physicsEngine/physicsEngine.h"
 
 #include "debug_tools/debug_tools.h"
 
@@ -40,11 +41,11 @@ void resize_callback(GLFWwindow* window,int width, int height);
 int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
-    float borderArea = 10000;
+    float borderArea = 100000;
     
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
-    if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object\n";return -1;}
+    if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object inside programStartMenu\n";return -1;}
     
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
@@ -77,15 +78,15 @@ int main(){
     particleTypePointer = new class_particleType*[2];
     for(int i = 0; i < particleTypesAmount; i++){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
+        if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
-
+    
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
     glm::mat4 cameraInit = glm::mat4(1.0f);
     glm::vec3 cameraPosition(0.0f, 0.0f, -6.0f);
     cameraInit = glm::translate(cameraInit, cameraPosition);
     glm::mat4 positionMatrix = glm::mat4(1.0f);
-    positionMatrix = glm::translate(positionMatrix, particleTypePointer[0]->particle[0].position);
 
     Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
     shader_standarad.use();
@@ -159,6 +160,8 @@ int main(){
     
     while(!glfwWindowShouldClose(window)){
         int current = 0; 
+        const float speedScaler = 0.001;
+        
         inputCheck(window, positionMatrix);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -171,10 +174,13 @@ int main(){
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
 
             for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
-            positionMatrix = glm::mat4(1.0f);
-            positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
-            shader_standarad.setMat4("motion", positionMatrix);
-            glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
+                physicsEngine(particleTypePointer, particleTypesAmount, borderArea);
+                particleTypePointer[j]->particle[i].position += particleTypePointer[j]->particle[i].velocity * speedScaler;
+
+                positionMatrix = glm::mat4(1.0f);
+                positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
+                shader_standarad.setMat4("motion", positionMatrix);
+                glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
             }
         }
         
