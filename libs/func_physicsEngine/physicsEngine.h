@@ -5,6 +5,6 @@
 
 
 void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea);
-void borderCollisionHandler(class_particle& particle, const double& borderDisplacement);
+void borderCollisionHandler(class_particle& particle, const float particleRadius, const double& borderDisplacement);
 
 #endif

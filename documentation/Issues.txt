@@ -22,3 +22,8 @@ calculate a reasonable threshold and validate inputs. Also use unsigned long lon
 During developement, not much care was given to freeing dynamically allocated memory. Thus memory
 leaks may occur. For example, the particleType class pointer pointer object may not be cleaned up
 properly.
+
+The border detection currently checks if the current position of the particle is past the border. This
+means the check happens after moving. So the particles have a large tendency to go past the border. The 
+greater the particles speed, the further the particel can go past the border before being corrected.
+This means the border is inconsistent. 

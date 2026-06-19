@@ -6,9 +6,9 @@
 #include <iostream>
 size_t programInit(class_particleInitHelper*& particleInitHelper){
     size_t count_particleTypes = 0;
-    std::cout << "Number of types of particles: "; std::cin >> count_particleTypes;
+    std::cout << "Number of types of particles (Type 0 for defualt): "; std::cin >> count_particleTypes;
     
-    if(count_particleTypes != 0){
+    if(count_particleTypes > 0){
         particleInitHelper = new class_particleInitHelper(count_particleTypes);
         if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper failed to be instantiated in programInit\n";}
 
@@ -31,26 +31,27 @@ size_t programInit(class_particleInitHelper*& particleInitHelper){
 }
 
 size_t defaultInit(class_particleInitHelper*& particleInitHelper){
-    size_t count_particleTypes = 2;
+    size_t count_particleTypes = 3;
     particleInitHelper = new class_particleInitHelper(count_particleTypes);
     if(particleInitHelper == nullptr){std::cout << "ProgramInitHelper failed to instantiate in defaultInit\n";}
 
     particleInitHelper->name[0] = "Defualt Red";
     particleInitHelper->mass[0] = 1.0f;
     particleInitHelper->radius[0] = 0.2f;
-    particleInitHelper->color[0].x = 0.7f;
-    particleInitHelper->color[0].y = 0.2f;
-    particleInitHelper->color[0].z = 0.0f;
-    particleInitHelper->particleCount[0] = 5;
+    particleInitHelper->color[0] = glm::vec3(0.6f, 0.2f, 0.0f);
+    particleInitHelper->particleCount[0] = 10;
     
     particleInitHelper->name[1] = "Defualt Blue";
     particleInitHelper->mass[1] = 1.0f;
     particleInitHelper->radius[1] = 0.2f;
-    particleInitHelper->color[1].x = 0.1f;
-    particleInitHelper->color[1].y = 0.1f;
-    particleInitHelper->color[1].z = 0.8f;
-    particleInitHelper->particleCount[1] = 5;
+    particleInitHelper->color[1] = glm::vec3(0.0f, 0.2f, 0.6f);
+    particleInitHelper->particleCount[1] = 10;
     
+    particleInitHelper->name[2] = "Defualt Green";
+    particleInitHelper->mass[2] = 1.0f;
+    particleInitHelper->radius[2] = 0.2f;
+    particleInitHelper->color[2] = glm::vec3(0.1f, 0.6f, 0.1f);
+    particleInitHelper->particleCount[2] = 10;
     return count_particleTypes;
 }
 
