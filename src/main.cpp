@@ -169,6 +169,7 @@ int main(){
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        physicsEngine(particleTypePointer, particleTypesAmount, borderArea);
         shader_standarad.use();
         for(int j = 0; j < particleTypesAmount; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
@@ -176,7 +177,6 @@ int main(){
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
 
             for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
-                borderCollisionHandler(particleTypePointer[j]->particle[i], particleTypePointer[j]->particleRadius, std::cbrt(borderArea));
                 particleTypePointer[j]->particle[i].position += particleTypePointer[j]->particle[i].velocity * speedScaler;
 
                 positionMatrix = glm::mat4(1.0f);

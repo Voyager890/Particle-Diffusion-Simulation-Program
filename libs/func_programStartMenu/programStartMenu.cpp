@@ -39,19 +39,19 @@ size_t defaultInit(class_particleInitHelper*& particleInitHelper){
     particleInitHelper->mass[0] = 1.0f;
     particleInitHelper->radius[0] = 0.2f;
     particleInitHelper->color[0] = glm::vec3(0.6f, 0.2f, 0.0f);
-    particleInitHelper->particleCount[0] = 10;
+    particleInitHelper->particleCount[0] = 20;
     
     particleInitHelper->name[1] = "Defualt Blue";
     particleInitHelper->mass[1] = 1.0f;
     particleInitHelper->radius[1] = 0.2f;
     particleInitHelper->color[1] = glm::vec3(0.0f, 0.2f, 0.6f);
-    particleInitHelper->particleCount[1] = 10;
+    particleInitHelper->particleCount[1] = 20;
     
     particleInitHelper->name[2] = "Defualt Green";
     particleInitHelper->mass[2] = 1.0f;
     particleInitHelper->radius[2] = 0.2f;
     particleInitHelper->color[2] = glm::vec3(0.1f, 0.6f, 0.1f);
-    particleInitHelper->particleCount[2] = 10;
+    particleInitHelper->particleCount[2] = 20;
     return count_particleTypes;
 }
 
