@@ -44,7 +44,7 @@ void resize_callback(GLFWwindow* window,int width, int height);
 int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32;
-    float borderArea = 64;
+    float borderArea = 27;
     
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
