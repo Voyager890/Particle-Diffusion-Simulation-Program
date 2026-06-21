@@ -3,6 +3,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/geometric.hpp>
 #include <random>
 
 class_particle::class_particle()
@@ -14,6 +15,8 @@ class_particle::class_particle()
     position = glm::vec3(0.0f);
     // position = glm::vec3(dist(rd), dist(rd), dist(rd));
     velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
+    velocity = glm::normalize(velocity);
+    velocity *= 1.0; // Replace with speed input
 }
 
 

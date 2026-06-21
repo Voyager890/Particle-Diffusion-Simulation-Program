@@ -11,7 +11,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/external/glad)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_bufferObjectsInitHelper)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_particles)
-add_subdirectory(${CMAKE_SOURCE_DIR}/libs/func_proceduralSphere)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/proceduralGeometry)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/class_particleInitHelper)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/debug_tools)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/func_programStartMenu)
@@ -37,7 +37,7 @@ target_link_libraries(Diffusion PRIVATE
     particleInitHelper
 
     programStartMenu
-    proceduralSphere
+    proceduralGeometry
     debug_tools
 
     physicsEngine

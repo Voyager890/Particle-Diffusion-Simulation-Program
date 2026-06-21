@@ -24,13 +24,14 @@
 #include <ostream>
 
 // Custom Libraries
+#include "proceduralGeometry/proceduralBoundry.h"
 #include "shaders/class.hpp"
 #include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 #include "class_particles/particles.h"
 #include "class_particleInitHelper/particleInitHelper.h"
-#include "func_proceduralSphere/proceduralSphere.h"
 #include "func_programStartMenu/programStartMenu.h"
 #include "func_physicsEngine/physicsEngine.h"
+#include "proceduralGeometry/proceduralSphere.h"
 
 #include "debug_tools/debug_tools.h"
 
@@ -110,7 +111,11 @@ int main(){
 
 
     // Light source buffer object initialzation
-    float lightSourceVertices[] = {0.0f, 1.0f, 0.0f,    1.0f,-0.5f,0.0f,    -1.0f,-0.5f,0.0f};
+    float lightSourceVertices[] = {
+         0.0f,  1.0f, 0.0f,
+         1.0f, -0.5f, 0.0f,
+        -1.0f, -0.5f, 0.0f
+    };
     unsigned int lightSourceVBO, lightSourceVAO;
 
     glGenVertexArrays(1, &lightSourceVAO);
@@ -130,32 +135,33 @@ int main(){
 
     unsigned int ebo;
     for(int i = 0; i < particleTypesAmount; i++){
-    class_bufferObjectsInitHelper bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
-    vertexRingGenerator(bufferObjects);
+        class_bufferObjectsInitHelper bufferObjects(iVerticesPerRing, particleTypePointer[i]->particleRadius);
+        vertexRingGenerator(bufferObjects);
 
-    if(i == 0){ 
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
+            if(i == 0){ 
+            glGenBuffers(1, &ebo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferObjects.eboCapacity * sizeof(unsigned int), bufferObjects.eboData, GL_STATIC_DRAW);
+            }
+
+        glGenBuffers(1, &particleTypePointer[i]->vertexBufferObject);
+        glGenVertexArrays(1, &particleTypePointer[i]->vertexArrayObject);
+        
+        glBindVertexArray(particleTypePointer[i]->vertexArrayObject);
+
+        glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[i]->vertexBufferObject);
+        glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vboData, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     }
 
-    glGenBuffers(1, &particleTypePointer[i]->vertexBufferObject);
-    glGenVertexArrays(1, &particleTypePointer[i]->vertexArrayObject);
-    
-    glBindVertexArray(particleTypePointer[i]->vertexArrayObject);
-
-    glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[i]->vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, bufferObjects.capacity * sizeof(float), bufferObjects.vboData, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    }
-
-
+    // Border Cube buffer object init
+    GLuint borderVertexArrayObject = initBorderBuffer((std::cbrt(borderArea)/2.0));
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
@@ -173,7 +179,6 @@ int main(){
         shader_standarad.use();
         for(int j = 0; j < particleTypesAmount; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
-            glBindBuffer(GL_ARRAY_BUFFER, particleTypePointer[j]->vertexBufferObject);
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
 
             for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
@@ -192,8 +197,10 @@ int main(){
         glBindVertexArray(lightSourceVAO);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
-
-
+        
+        glBindVertexArray(borderVertexArrayObject);
+        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

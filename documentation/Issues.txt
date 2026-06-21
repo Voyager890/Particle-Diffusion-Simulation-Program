@@ -27,3 +27,6 @@ The border detection currently checks if the current position of the particle is
 means the check happens after moving. So the particles have a large tendency to go past the border. The 
 greater the particles speed, the further the particel can go past the border before being corrected.
 This means the border is inconsistent. 
+
+Currenlty GPU memory cleanup is handled soley by OS. Dynamic buffer objects will cause gpu memory
+leaks.
