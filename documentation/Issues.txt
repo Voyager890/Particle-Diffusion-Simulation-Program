@@ -30,3 +30,6 @@ This means the border is inconsistent.
 
 Currenlty GPU memory cleanup is handled soley by OS. Dynamic buffer objects will cause gpu memory
 leaks.
+
+Currently the proceduralBorder is being used in the main file without its header file being included.
+figure out why this works.

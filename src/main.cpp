@@ -165,35 +165,36 @@ int main(){
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
-    
     while(!glfwWindowShouldClose(window)){
         int current = 0; 
         const float speedScaler = 0.05;
         
-        inputCheck(window, positionMatrix);
-
+        inputCheck(window, cameraInit);
+        
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         physicsEngine(particleTypePointer, particleTypesAmount, borderArea);
         shader_standarad.use();
+        shader_standarad.setMat4("camera", cameraInit);
         for(int j = 0; j < particleTypesAmount; j++){
             glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
-
+            
             for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
-                particleTypePointer[j]->particle[i].position += particleTypePointer[j]->particle[i].velocity * speedScaler;
-
+                // particleTypePointer[j]->particle[i].position += particleTypePointer[j]->particle[i].velocity * speedScaler;
+                
                 positionMatrix = glm::mat4(1.0f);
                 positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
                 shader_standarad.setMat4("motion", positionMatrix);
                 glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
-
+                
             }
         }
         
-
+        
         shader_lightSource.use();
+        shader_lightSource.setMat4("camera", cameraInit);
         glBindVertexArray(lightSourceVAO);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);

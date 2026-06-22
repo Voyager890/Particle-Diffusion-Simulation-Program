@@ -26,5 +26,17 @@ void borderCollisionHandler(class_particle& particle, const float particleRadius
         if((glm::abs(particle.position[i]) + particleRadius) > borderDisplacement){
             particle.velocity[i] *= -1;
         }
+        particle.position[i] += particle.velocity[i] * 0.005;
     }
+    // const glm::vec3 nextPosition = particle.position + particle.velocity;
+    // for(int i = 0; i < 3; i++){
+    //     if((glm::abs(nextPosition[i]) + particleRadius) > borderDisplacement){
+    //         const double trespassMagnitude = borderDisplacement + glm::abs(nextPosition[i]);
+    //         particle.position[i] = std::copysign(borderDisplacement - trespassMagnitude, particle.position[i]);
+    //         particle.velocity *= -1;
+    //     }else{
+    //         particle.position[i] += particle.velocity[i] * 0.05;
+    //     }
+    
+    // }
 }
