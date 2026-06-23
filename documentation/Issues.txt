@@ -23,13 +23,11 @@ During developement, not much care was given to freeing dynamically allocated me
 leaks may occur. For example, the particleType class pointer pointer object may not be cleaned up
 properly.
 
-The border detection currently checks if the current position of the particle is past the border. This
-means the check happens after moving. So the particles have a large tendency to go past the border. The 
-greater the particles speed, the further the particel can go past the border before being corrected.
-This means the border is inconsistent. 
-
 Currenlty GPU memory cleanup is handled soley by OS. Dynamic buffer objects will cause gpu memory
 leaks.
 
 Currently the proceduralBorder is being used in the main file without its header file being included.
 figure out why this works.
+
+The currenot border collision handler probably does not work as intended when more than axis is trespassed
+at once.

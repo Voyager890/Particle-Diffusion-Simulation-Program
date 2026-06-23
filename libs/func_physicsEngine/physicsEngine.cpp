@@ -22,21 +22,26 @@ void physicsEngine(class_particleType **&particleTypePointer, const int particle
 
 void borderCollisionHandler(class_particle& particle, const float particleRadius, const double& borderDisplacement){
     // Toggles direction based on which axis border was crossed
-    for(int i = 0; i < 3; i++){
-        if((glm::abs(particle.position[i]) + particleRadius) > borderDisplacement){
-            particle.velocity[i] *= -1;
-        }
-        particle.position[i] += particle.velocity[i] * 0.005;
-    }
-    // const glm::vec3 nextPosition = particle.position + particle.velocity;
     // for(int i = 0; i < 3; i++){
-    //     if((glm::abs(nextPosition[i]) + particleRadius) > borderDisplacement){
-    //         const double trespassMagnitude = borderDisplacement + glm::abs(nextPosition[i]);
-    //         particle.position[i] = std::copysign(borderDisplacement - trespassMagnitude, particle.position[i]);
-    //         particle.velocity *= -1;
-    //     }else{
-    //         particle.position[i] += particle.velocity[i] * 0.05;
+    //     if((glm::abs(particle.position[i]) + particleRadius) > borderDisplacement){
+    //         particle.velocity[i] *= -1;
     //     }
-    
+    //     particle.position[i] += particle.velocity[i];
     // }
+    bool borderCollision = false;
+    do{
+        borderCollision = false;
+        const glm::vec3 nextPosition = particle.position + particle.velocity;
+        for(int i = 0; i < 3; i++){
+            if((glm::abs(nextPosition[i]) + particleRadius) > borderDisplacement){
+                borderCollision = true;
+                const double trespassMagnitude = borderDisplacement + glm::abs(nextPosition[i]);
+                particle.position[i] = std::copysign(borderDisplacement - trespassMagnitude, particle.position[i]);
+                particle.velocity [i]*= -1;
+            }else{
+                particle.position[i] += particle.velocity[i];
+            }
+        
+        }
+    }while(borderCollision);
 }

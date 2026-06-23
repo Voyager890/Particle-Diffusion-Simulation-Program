@@ -167,7 +167,6 @@ int main(){
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
         int current = 0; 
-        const float speedScaler = 0.05;
         
         inputCheck(window, cameraInit);
         
@@ -182,7 +181,6 @@ int main(){
             shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
             
             for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
-                // particleTypePointer[j]->particle[i].position += particleTypePointer[j]->particle[i].velocity * speedScaler;
                 
                 positionMatrix = glm::mat4(1.0f);
                 positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
