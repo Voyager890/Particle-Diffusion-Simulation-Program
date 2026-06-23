@@ -1,5 +1,5 @@
 #include "glad/glad.h"
-#include "proceduralBoundry.h"
+#include "proceduralGeometry.h"
 
 GLuint initBorderBuffer(const double borderDisplacement){
     const float e = borderDisplacement;

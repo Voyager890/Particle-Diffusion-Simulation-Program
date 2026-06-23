@@ -24,14 +24,13 @@
 #include <ostream>
 
 // Custom Libraries
-#include "proceduralGeometry/proceduralBoundry.h"
+#include "proceduralGeometry/proceduralGeometry.h"
 #include "shaders/class.hpp"
 #include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 #include "class_particles/particles.h"
 #include "class_particleInitHelper/particleInitHelper.h"
 #include "func_programStartMenu/programStartMenu.h"
 #include "func_physicsEngine/physicsEngine.h"
-#include "proceduralGeometry/proceduralSphere.h"
 
 #include "debug_tools/debug_tools.h"
 

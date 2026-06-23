@@ -13,7 +13,7 @@
 
 #include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 
-#include "proceduralSphere.h"
+#include "proceduralGeometry.h"
 
 void vertexRingGenerator(class_bufferObjectsInitHelper &bufferObjects){
     for(int currentLayer = 0; currentLayer < bufferObjects.layerCount; currentLayer++){

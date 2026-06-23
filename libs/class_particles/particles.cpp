@@ -16,7 +16,7 @@ class_particle::class_particle()
     // position = glm::vec3(dist(rd), dist(rd), dist(rd));
     velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
     velocity = glm::normalize(velocity);
-    velocity *= 0.5f; // Replace with speed input
+    velocity *= 0.05f; // Replace with speed input
 }
 
 
