@@ -26,8 +26,4 @@ properly.
 Currenlty GPU memory cleanup is handled soley by OS. Dynamic buffer objects will cause gpu memory
 leaks.
 
-Currently the proceduralBorder is being used in the main file without its header file being included.
-figure out why this works.
-
-The currenot border collision handler probably does not work as intended when more than axis is trespassed
-at once.
+Currently the border collision handler seems to loop around a set circuit
