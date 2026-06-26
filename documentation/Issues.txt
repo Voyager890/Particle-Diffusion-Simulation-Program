@@ -31,3 +31,7 @@ Currently the border collision handler seems to loop around a set circuit
 Current particle collision detection system is very expensive. It loops through ever member particle
 and then compares it with every other member particle in another loop. Heavily increased overhead and
 runtime offset.
+
+Particles sometimes stick to eachother when they collide. This must be because the particele collisions
+currently work in the present context. Move collision detection to take future context as input similar 
+to border collision detection.

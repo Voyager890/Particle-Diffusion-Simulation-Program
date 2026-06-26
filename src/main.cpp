@@ -49,6 +49,7 @@ int main(){
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
     if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object inside programStartMenu\n";return -1;}
     
+
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
     glm::vec3 lightColor(1.0f);
 

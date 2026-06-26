@@ -5,10 +5,12 @@
 #include <cstddef>
 
 
+
 void physicsEngine(class_particleType**& particleTypePointer, const int particleTypesAmount, const float borderArea);
 
 void borderCollisionHandler(class_particle& particle, const float particleRadius, const double& borderDisplacement);
 void particleCollisionHandler(class_particleType**& particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount);
 
-void calculateNewVelocities(class_particle& aParticle, class_particle& bParticle, const float aMass, const float bMass);
+
+void finalVelocityCalculator(const double aMass, const double bMass,glm::vec3& aVelocity, glm::vec3& bVelocity);
 #endif

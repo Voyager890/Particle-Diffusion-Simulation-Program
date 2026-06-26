@@ -56,10 +56,35 @@ void particleCollisionHandler(class_particleType**& particleTypePointer, const s
             if(distance > maxDistance){continue;}
             
             const double targetMass = particleTypePointer[targetType]->mass;
-            const double comperandMass = particleTypePointer[currentParticle]->mass;
+            const double comperandMass = particleTypePointer[currentType]->mass;
 
-            // I think a POD will be best. 
+            const double aMass = particleTypePointer[targetType]->mass;
+            glm::vec3& aVelocity = particleTypePointer[targetType]->particle[targetIndex].velocity;
+            const double bMass = particleTypePointer[currentType]->mass;
+            glm::vec3& bVelocity = particleTypePointer[currentType]->particle[currentParticle].velocity;
+
+            finalVelocityCalculator(aMass, bMass, aVelocity, bVelocity);
+
         }
     }
+}
+
+void finalVelocityCalculator(const double aMass, const double bMass,glm::vec3& aVelocity, glm::vec3& bVelocity){
+    const float coeffOfResititution = 1.0f;
+    
+    const float totalMass = aMass + bMass;
+
+    glm::vec3 aVelocityFinal(0.0f);
+    glm::vec3 bVelocityFinal(0.0f);
+    for(int i = 0; i < 3; i++){
+        const double totalMomentum = aMass * aVelocity[i] + bMass * bVelocity[i];
+        
+        const double initialVelocityDifference = aVelocity[i] - bVelocity[i];
+    
+        bVelocityFinal[i] = (aMass * (coeffOfResititution * initialVelocityDifference) + totalMomentum) / totalMass;
+        aVelocityFinal[i] = (totalMomentum - (bMass * bVelocityFinal[i])) / aMass;
+    }
+    aVelocity = aVelocityFinal;
+    bVelocity = bVelocityFinal;    
 }
 
