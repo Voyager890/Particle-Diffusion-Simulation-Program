@@ -10,16 +10,13 @@
 void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea){
     const double borderDisplacement = std::cbrt(borderArea) / 2.0;
 
-    for(int current_particleType = 0; current_particleType < particleTypesAmount; current_particleType++){
-        for(int current_particle = 0; current_particle < particleTypePointer[current_particleType]->particleCount; current_particle++){
+    for(int currentType = 0; currentType < particleTypesAmount; currentType++){
+        for(int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++){
 
-            particleCollisionHandler(particleTypePointer[current_particleType]->particle[current_particle], 
-                                     particleTypePointer[current_particleType]->particleRadius, 
-                                     particleTypePointer,
-                                     particleTypesAmount
-                                    );
-            borderCollisionHandler(particleTypePointer[current_particleType]->particle[current_particle],
-                                   particleTypePointer[current_particleType]->particleRadius,
+            particleCollisionHandler(particleTypePointer, currentType, currentParticle, particleTypesAmount);
+            
+            borderCollisionHandler(particleTypePointer[currentType]->particle[currentParticle],
+                                   particleTypePointer[currentType]->particleRadius,
                                    borderDisplacement);
         }
     }
@@ -45,18 +42,24 @@ void borderCollisionHandler(class_particle& particle, const float particleRadius
     }while(borderCollision);
 }
 
-void particleCollisionHandler(class_particle& target, const float targetRadius, class_particleType**& particleTypePointer, const int particleTypesAmount){
-    
-    for(int current_particleType = 0; current_particleType < particleTypesAmount; current_particleType++){
-        for(int current_particle = 0; current_particle < particleTypePointer[current_particleType]->particleCount; current_particle++){
+void particleCollisionHandler(class_particleType**& particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount){
+    for(int currentType = 0; currentType < particleTypesAmount; currentType++){
+        for(int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++){
+            if(targetType == currentType && targetIndex == currentParticle){continue;}
 
-            if(target.position == particleTypePointer[current_particleType]->particle[current_particle].position){continue;} // Skip if same particle
+            class_particle& target = particleTypePointer[targetType]->particle[targetIndex];
+            class_particle& comperand = particleTypePointer[currentType]->particle[currentParticle];
 
-            const double distanceInbetween = glm::distance(target.position, particleTypePointer[current_particleType]->particle[current_particle].position);   
-            const double maxDistance = targetRadius + particleTypePointer[current_particleType]->particleRadius;
-            if(distanceInbetween < maxDistance){
-                std::cout << "Collided" << std::endl;
-            }
+            const double distance = glm::distance(target.position, comperand.position);
+            const double maxDistance = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
+            
+            if(distance > maxDistance){continue;}
+            
+            const double targetMass = particleTypePointer[targetType]->mass;
+            const double comperandMass = particleTypePointer[currentParticle]->mass;
+
+            // I think a POD will be best. 
         }
     }
 }
+
