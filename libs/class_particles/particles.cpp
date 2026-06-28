@@ -40,3 +40,33 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
         }
     }
 }
+
+void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea){
+    const double borderDisplacement = std::cbrt(borderArea) / 2;
+
+    for(int typeN = 0; typeN < countParticleType; typeN++){
+        const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
+        for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
+
+            if(!isOverlapping(particleTypePointer, countParticleType, typeN, particleN)){continue;}
+
+        }
+    }
+}
+
+bool isOverlapping(class_particleType**& particleTypePointer,const size_t countParticleType, const size_t targetType, const size_t targetParticle){
+    bool isOverlapping = false;
+    
+    const glm::vec3 targetPosition = particleTypePointer[targetType]->particle[targetParticle].position;
+    const double targetRadius = particleTypePointer[targetType]->particleRadius;
+
+    for(int typeN = 0; typeN < countParticleType; typeN++){
+        const double maxDistance = targetRadius + particleTypePointer[typeN]->particleRadius;
+        for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
+            const double distance = glm::distance(targetPosition,  particleTypePointer[typeN]->particle[particleN].position);
+            if(distance <= maxDistance){isOverlapping = true;}
+        }
+    }
+
+    return isOverlapping;
+}
