@@ -83,6 +83,7 @@ int main(){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
+    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.05);
     
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
@@ -166,14 +167,15 @@ int main(){
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
-        int current = 0; 
-        
+        static int count = 0;
         inputCheck(window, cameraInit);
         
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        physicsEngine(particleTypePointer, particleTypesAmount, borderArea);
+        count++;
+
+        physicsEngine(particleTypePointer, particleTypesAmount, borderArea); // ISSUE
+
         shader_standarad.use();
         shader_standarad.setMat4("camera", cameraInit);
         for(int j = 0; j < particleTypesAmount; j++){

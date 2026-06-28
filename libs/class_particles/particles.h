@@ -10,10 +10,7 @@ class class_particle{
     public:
     glm::vec3 velocity;
     glm::vec3 position;
-
-    class_particle();
 };
-
 
 
 class class_particleType {
@@ -33,4 +30,6 @@ class class_particleType {
     long particleCount;
     class_particle* particle;
 };
+
+void initParticleProperties(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea, const float speed);
 #endif
