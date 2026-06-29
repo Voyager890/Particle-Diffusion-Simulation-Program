@@ -35,3 +35,8 @@ runtime offset.
 Particles sometimes stick to eachother when they collide. This must be because the particele collisions
 currently work in the present context. Move collision detection to take future context as input similar 
 to border collision detection.
+
+collision detection systems use expensive root functions. Minimize them.
+
+If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
+in the physics engine in a enldess loop.

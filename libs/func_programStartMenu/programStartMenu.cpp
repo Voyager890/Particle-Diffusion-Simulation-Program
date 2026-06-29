@@ -17,11 +17,12 @@ size_t programInit(class_particleInitHelper*& particleInitHelper){
             std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   particleInitHelper->mass[i]; 
             std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> particleInitHelper->radius[i]; 
             std::cout << "Particle " << i + 1 << " Amount: "; std::cin >> particleInitHelper->particleCount[i]; 
-        
-            std::cout << "Particle's RGB Color" << std::endl;
-            std::cout << "Particle " << i + 1 << " R: "; std::cin >> particleInitHelper->color[i].x;
-            std::cout << "Particle " << i + 1 << " G: "; std::cin >> particleInitHelper->color[i].y;
-            std::cout << "Particle " << i + 1 << " B: "; std::cin >> particleInitHelper->color[i].z;
+            
+            rgbInput(particleInitHelper->color[i]);
+            // std::cout << "Particle's RGB Color" << std::endl;
+            // std::cout << "Particle " << i + 1 << " R: "; std::cin >> particleInitHelper->color[i].x;
+            // std::cout << "Particle " << i + 1 << " G: "; std::cin >> particleInitHelper->color[i].y;
+            // std::cout << "Particle " << i + 1 << " B: "; std::cin >> particleInitHelper->color[i].z;
             
         }
     }else{
@@ -68,4 +69,6 @@ void rgbInput(glm::vec3& color){
         
         if(!valid){std::cout << "Percentages must be in range 0 to 100 inclusive. Try again" << std::endl;}
     }while(!valid);
+
+    color *= 0.01;
 }

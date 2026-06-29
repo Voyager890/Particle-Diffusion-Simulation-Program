@@ -32,6 +32,6 @@ class class_particleType {
 };
 
 void initParticleProperties(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea, const float speed);
-void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea);
+void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const double borderDisplacement);
 bool isOverlapping(class_particleType**& particleTypePointer,const size_t countParticleType, const size_t targetType, const size_t targetParticle);
 #endif
