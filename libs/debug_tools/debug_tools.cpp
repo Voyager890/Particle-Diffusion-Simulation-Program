@@ -42,3 +42,11 @@ void debug_eboDataDisplayer(class_bufferObjectsInitHelper &bufferObjects){
 
     std::cout << std::endl;
 }
+
+void debug_displayVec3(const glm::vec3 vector, std::string name){
+  std::cout << "(" << name << "): ";
+  for(int i = 0; i < 3; i++){
+    std::cout << vector[i] << ", ";
+  }
+  std::cout << std::endl;
+}

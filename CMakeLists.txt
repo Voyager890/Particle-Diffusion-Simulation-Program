@@ -38,9 +38,12 @@ target_link_libraries(Diffusion PRIVATE
 
     programStartMenu
     proceduralGeometry
-    debug_tools
 
     physicsEngine
+)
+
+target_link_libraries(Diffusion PUBLIC
+  debug_tools
 )
 
 target_include_directories(Diffusion PRIVATE
