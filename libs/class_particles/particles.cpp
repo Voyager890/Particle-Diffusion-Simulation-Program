@@ -10,6 +10,9 @@
 #include <glm/geometric.hpp>
 #include <random>
 
+class_particle::class_particle(){
+  displacementBuffer = glm::vec3(0.0);
+}
 
 class_particleType::class_particleType(std::string particleName, glm::vec3 objectColor, float mass, float particleRadius, long particleCount):
 particleName(particleName),
@@ -39,6 +42,7 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
 
             particleTypePointer[typeN]->particle[particleN].velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
             particleTypePointer[typeN]->particle[particleN].velocity *= speed;
+
         }
     }
 
@@ -53,7 +57,6 @@ void removeOverlap(class_particleType**& particleTypePointer, const size_t count
     for(int typeN = 0; typeN < countParticleType; typeN++){
         const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
         for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
-            std::cout << typeN << " : " << particleN << std::endl;
             while(isOverlapping(particleTypePointer, countParticleType, typeN, particleN)){
                 particleTypePointer[typeN]->particle[particleN].position = glm::vec3(dist(rd), dist(rd), dist(rd));
                 particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
@@ -75,7 +78,7 @@ bool isOverlapping(class_particleType**& particleTypePointer,const size_t countP
             if(typeN == targetType && particleN == targetParticle){continue;}
 
             const double distance = glm::distance(targetPosition,  particleTypePointer[typeN]->particle[particleN].position);
-            if(distance <= maxDistance){isOverlapping = true;std::cout << distance << " < " << maxDistance << std::endl;}
+            if(distance <= maxDistance){isOverlapping = true;}
         }
     }
     
