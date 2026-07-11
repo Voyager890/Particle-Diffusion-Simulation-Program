@@ -3,7 +3,6 @@
 #include <cmath>
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
-#include <iostream>
 
 #include "debug_tools/debug_tools.h"
 
@@ -47,48 +46,42 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
       const double deflectionVector = std::copysign(deflectionVector, particle.position[i]);
       particle.displacementBuffer[i] += deflectionVector;
       particle.velocity[i] *= -1;
-      
 
-      debug_displayVec3(particle.displacementBuffer, "displacementBuffer");
     }
   } while (borderCollision);
 }
 
-void particleCollisionHandler(class_particleType **&particleTypePointer,
-                              const size_t targetType, const size_t targetIndex,
-                              const size_t particleTypesAmount) {
-  for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
-    for (int currentParticle = 0;
-         currentParticle < particleTypePointer[currentType]->particleCount;
-         currentParticle++) {
-      if (targetType == currentType && targetIndex == currentParticle) {
+void particleCollisionHandler(class_particleType **&particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount) {
+  // To avoid dual proccessing of a particle pair. Start comparing particles after target particle. Particles before it would have already processed itself with target. 
+  bool firstLoop = true;
+
+  for (int currentType = targetIndex; currentType < particleTypesAmount; currentType++) {
+    for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
+
+      if (firstLoop){
+        firstLoop = false;
+        currentParticle = targetIndex;
         continue;
       }
 
-      class_particle &target =
-          particleTypePointer[targetType]->particle[targetIndex];
-      class_particle &comperand =
-          particleTypePointer[currentType]->particle[currentParticle];
+      class_particle &target = particleTypePointer[targetType]->particle[targetIndex];
+      class_particle &comperand = particleTypePointer[currentType]->particle[currentParticle];
 
-      const double distance =
-          glm::distance(target.position, comperand.position);
-      const double maxDistance =
-          particleTypePointer[targetType]->particleRadius +
-          particleTypePointer[currentType]->particleRadius;
+      const glm::vec3 nextTargetPosition = resultantDisplacment(target);
+      const glm::vec3 nextComperandPosition = resultantDisplacment(comperand);
 
-      if (distance > maxDistance) {
-        continue;
-      }
+      const double futureDisplacement = glm::distance(target.position, comperand.position);
+      const double maxDistance = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
+
+      if (futureDisplacement > maxDistance) {continue;}
 
       const double targetMass = particleTypePointer[targetType]->mass;
       const double comperandMass = particleTypePointer[currentType]->mass;
 
-      const double aMass = particleTypePointer[targetType]->mass;
-      glm::vec3 &aVelocity =
-          particleTypePointer[targetType]->particle[targetIndex].velocity;
-      const double bMass = particleTypePointer[currentType]->mass;
-      glm::vec3 &bVelocity =
-          particleTypePointer[currentType]->particle[currentParticle].velocity;
+      const double aMass   = particleTypePointer[targetType]->mass;
+      glm::vec3 &aVelocity = particleTypePointer[targetType]->particle[targetIndex].velocity;
+      const double bMass   = particleTypePointer[currentType]->mass;
+      glm::vec3 &bVelocity = particleTypePointer[currentType]->particle[currentParticle].velocity;
 
       finalVelocityCalculator(aMass, bMass, aVelocity, bVelocity);
     }
@@ -118,7 +111,7 @@ void finalVelocityCalculator(const double aMass, const double bMass,
   bVelocity = bVelocityFinal;
 }
 
-glm::vec3 resultantDisplacment(class_particle &particle) {
+glm::vec3 resultantDisplacment(const class_particle& particle) {
   glm::vec3 resultant(0.0);
 
   for (int i = 0; i < 3; i++) {
