@@ -4,6 +4,7 @@
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
 
+#include <iostream>
 #include "debug_tools/debug_tools.h"
 
 void physicsEngine(class_particleType **&particleTypePointer,
@@ -11,9 +12,7 @@ void physicsEngine(class_particleType **&particleTypePointer,
   const double borderDisplacement = std::cbrt(borderArea) / 2.0;
 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
-    for (int currentParticle = 0;
-         currentParticle < particleTypePointer[currentType]->particleCount;
-         currentParticle++) {
+    for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
 
       particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
@@ -38,9 +37,10 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
     borderCollision = false;
     const glm::vec3 nextPosition = resultantDisplacment(particle);
     for (int i = 0; i < 3; i++) {
-      if ((glm::abs(nextPosition[i]) + particleRadius) < borderDisplacement) {
-        continue;
-      }
+      if ((glm::abs(nextPosition[i]) + particleRadius) < borderDisplacement) {continue;}
+      
+      debug_instanceCounter(" : border collision");
+
       borderCollision = true;
       const double trespassMagnitude = glm::abs(nextPosition[i]) - borderDisplacement;
       const double deflectionVector = std::copysign(deflectionVector, particle.position[i]);
@@ -52,7 +52,7 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
 }
 
 void particleCollisionHandler(class_particleType **&particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount) {
-  // To avoid dual proccessing of a particle pair. Start comparing particles after target particle. Particles before it would have already processed itself with target. 
+  // To avoid dual proccessing of a particle pair. Start comparing particles after target particles memory location. Particles before it would have already processed itself with target. 
   bool firstLoop = true;
 
   for (int currentType = targetIndex; currentType < particleTypesAmount; currentType++) {
@@ -64,17 +64,18 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
         continue;
       }
 
-      class_particle &target = particleTypePointer[targetType]->particle[targetIndex];
-      class_particle &comperand = particleTypePointer[currentType]->particle[currentParticle];
+      const class_particle &target = particleTypePointer[targetType]->particle[targetIndex];
+      const class_particle &comperand = particleTypePointer[currentType]->particle[currentParticle];
 
-      const glm::vec3 nextTargetPosition = resultantDisplacment(target);
-      const glm::vec3 nextComperandPosition = resultantDisplacment(comperand);
+      //const glm::vec3 vectorDifference = target.position - comperand.position;
+      const glm::vec3 vectorDifference = resultantDisplacment(target) - resultantDisplacment(comperand);
+      const float displacement = glm::length(vectorDifference);
 
-      const double futureDisplacement = glm::distance(target.position, comperand.position);
-      const double maxDistance = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
+      const double maxDisplacement = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
 
-      if (futureDisplacement > maxDistance) {continue;}
-
+      if (displacement > maxDisplacement) {continue;}
+      
+      debug_instanceCounter(" : Particle collision");
       const double targetMass = particleTypePointer[targetType]->mass;
       const double comperandMass = particleTypePointer[currentType]->mass;
 

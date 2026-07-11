@@ -50,3 +50,9 @@ void debug_displayVec3(const glm::vec3 vector, std::string name){
   }
   std::cout << std::endl;
 }
+
+void debug_instanceCounter(std::string text){
+  static int count = 0;
+  count++;
+  std::cout << count << text << std::endl;
+}
