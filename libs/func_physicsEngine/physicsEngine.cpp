@@ -10,7 +10,8 @@
 void physicsEngine(class_particleType **&particleTypePointer,
                    const int particleTypesAmount, const float borderArea) {
   const double borderDisplacement = std::cbrt(borderArea) / 2.0;
-
+  
+  // dual processing? 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
 
@@ -39,7 +40,6 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
     for (int i = 0; i < 3; i++) {
       if ((glm::abs(nextPosition[i]) + particleRadius) < borderDisplacement) {continue;}
       
-      debug_instanceCounter(" : border collision");
 
       borderCollision = true;
       const double trespassMagnitude = glm::abs(nextPosition[i]) - borderDisplacement;
@@ -47,6 +47,9 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
       particle.displacementBuffer[i] += deflectionVector;
       particle.velocity[i] *= -1;
 
+      //debug_instanceCounter("Border collision");
+      debug_displayVec3(nextPosition, "Next Position");
+      debug_displayVec3(particle.displacementBuffer, "displacementBuffer");
     }
   } while (borderCollision);
 }
@@ -75,7 +78,7 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
 
       if (displacement > maxDisplacement) {continue;}
       
-      debug_instanceCounter(" : Particle collision");
+      //debug_instanceCounter(" : Particle collision");
       const double targetMass = particleTypePointer[targetType]->mass;
       const double comperandMass = particleTypePointer[currentType]->mass;
 
