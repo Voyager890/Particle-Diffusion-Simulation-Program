@@ -5,6 +5,7 @@
 #include <glm/geometric.hpp>
 
 #include <iostream>
+#include "class_particles/particles.h"
 #include "debug_tools/debug_tools.h"
 
 void physicsEngine(class_particleType **&particleTypePointer,
@@ -14,7 +15,7 @@ void physicsEngine(class_particleType **&particleTypePointer,
   // dual processing? 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
-
+      
       particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
 
@@ -22,8 +23,8 @@ void physicsEngine(class_particleType **&particleTypePointer,
           particleTypePointer[currentType]->particle[currentParticle],
           particleTypePointer[currentType]->particleRadius, borderDisplacement);
 
-      particleTypePointer[currentType]->particle[currentParticle].position = resultantDisplacment(particleTypePointer[currentType]->particle[currentParticle]);
-      particleTypePointer[currentType]->particle[currentParticle].displacementBuffer = glm::vec3(0.0);
+      particleTypePointer[currentType]->particle[currentParticle].position += particleTypePointer[currentType]->particle[currentParticle].velocity + particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer;
+      particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer = glm::vec3(0.0);
       
     }
   }
@@ -36,20 +37,24 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
 
   do {
     borderCollision = false;
-    const glm::vec3 nextPosition = resultantDisplacment(particle);
+    const glm::vec3 nextPosition = particle.position + particle.velocity + particle.positionCorrectionBuffer;
     for (int i = 0; i < 3; i++) {
-      if ((glm::abs(nextPosition[i]) + particleRadius) < borderDisplacement) {continue;}
+      if (glm::abs(nextPosition[i]) + particleRadius < borderDisplacement) {continue;}
       
 
       borderCollision = true;
-      const double trespassMagnitude = glm::abs(nextPosition[i]) - borderDisplacement;
-      const double deflectionVector = std::copysign(deflectionVector, particle.position[i]);
-      particle.displacementBuffer[i] += deflectionVector;
+      //const double trespassMagnitude = glm::abs(nextPosition[i] + particleRadius) - borderDisplacement;
+      //const double deflectionVector = std::copysign(glm::abs(particle.velocity[i]) + trespassMagnitude, particle.position[i]);
+
       particle.velocity[i] *= -1;
+      const double trespassMagnitude = glm::abs(nextPosition[i]) + particleRadius - borderDisplacement;
+      const double deflectionVector = std::copysign(trespassMagnitude, particle.velocity[i]);
+      particle.positionCorrectionBuffer[i] += deflectionVector;
 
       //debug_instanceCounter("Border collision");
+      std::cout << "DeflectionVector: " << deflectionVector << std::endl;
       debug_displayVec3(nextPosition, "Next Position");
-      debug_displayVec3(particle.displacementBuffer, "displacementBuffer");
+      debug_displayVec3(particle.positionCorrectionBuffer, "positionCorrectionBuffer");
     }
   } while (borderCollision);
 }
@@ -69,9 +74,11 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
 
       const class_particle &target = particleTypePointer[targetType]->particle[targetIndex];
       const class_particle &comperand = particleTypePointer[currentType]->particle[currentParticle];
+      
+      const glm::vec3 targetNextPosition = target.position + target.velocity + target.positionCorrectionBuffer; 
+      const glm::vec3 comperandNextPosition = comperand.position + comperand.velocity + comperand.positionCorrectionBuffer; 
+      const glm::vec3 vectorDifference = targetNextPosition - comperandNextPosition;
 
-      //const glm::vec3 vectorDifference = target.position - comperand.position;
-      const glm::vec3 vectorDifference = resultantDisplacment(target) - resultantDisplacment(comperand);
       const float displacement = glm::length(vectorDifference);
 
       const double maxDisplacement = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
@@ -115,17 +122,3 @@ void finalVelocityCalculator(const double aMass, const double bMass,
   bVelocity = bVelocityFinal;
 }
 
-glm::vec3 resultantDisplacment(const class_particle& particle) {
-  glm::vec3 resultant(0.0);
-
-  for (int i = 0; i < 3; i++) {
-    if (particle.displacementBuffer[i] != 0) {
-      resultant[i] = particle.displacementBuffer[i];
-    } else {
-      resultant[i] = particle.position[i] + particle.velocity[i];
-    }
-  }
-  
-  
-  return resultant;
-}

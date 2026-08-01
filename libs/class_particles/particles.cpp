@@ -11,7 +11,7 @@
 #include <random>
 
 class_particle::class_particle(){
-  displacementBuffer = glm::vec3(0.0);
+  positionCorrectionBuffer = glm::vec3(0.0);
 }
 
 class_particleType::class_particleType(std::string particleName, glm::vec3 objectColor, float mass, float particleRadius, long particleCount):

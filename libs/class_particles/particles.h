@@ -10,7 +10,7 @@ class class_particle{
     public:
     glm::vec3 velocity;
     glm::vec3 position;
-    glm::vec3 displacementBuffer;
+    glm::vec3 positionCorrectionBuffer;
 
     class_particle();
 };
