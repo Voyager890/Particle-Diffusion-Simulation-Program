@@ -43,18 +43,12 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
       
 
       borderCollision = true;
-      //const double trespassMagnitude = glm::abs(nextPosition[i] + particleRadius) - borderDisplacement;
-      //const double deflectionVector = std::copysign(glm::abs(particle.velocity[i]) + trespassMagnitude, particle.position[i]);
 
       particle.velocity[i] *= -1;
       const double trespassMagnitude = glm::abs(nextPosition[i]) + particleRadius - borderDisplacement;
       const double deflectionVector = std::copysign(trespassMagnitude, particle.velocity[i]);
       particle.positionCorrectionBuffer[i] += deflectionVector;
 
-      //debug_instanceCounter("Border collision");
-      std::cout << "DeflectionVector: " << deflectionVector << std::endl;
-      debug_displayVec3(nextPosition, "Next Position");
-      debug_displayVec3(particle.positionCorrectionBuffer, "positionCorrectionBuffer");
     }
   } while (borderCollision);
 }
@@ -99,8 +93,7 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
   }
 }
 
-void finalVelocityCalculator(const double aMass, const double bMass,
-                             glm::vec3 &aVelocity, glm::vec3 &bVelocity) {
+void finalVelocityCalculator(const double aMass, const double bMass, glm::vec3 &aVelocity, glm::vec3 &bVelocity) {
   const float coeffOfResititution = 1.0f;
 
   const float totalMass = aMass + bMass;

@@ -83,7 +83,7 @@ int main(){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
-    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.05);
+    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.007);
     
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
