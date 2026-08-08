@@ -2,32 +2,46 @@
 
 #include "class_particleInitHelper/particleInitHelper.h"
 #include <cstddef>
+#include <cstdio>
 #include <glm/ext/vector_float3.hpp>
-#include <iostream>
-size_t programInit(class_particleInitHelper*& particleInitHelper){
-    size_t count_particleTypes = 0;
-    std::cout << "Number of types of particles (Type 0 for defualt): "; std::cin >> count_particleTypes;
-    
-    if(count_particleTypes > 0){
-        particleInitHelper = new class_particleInitHelper(count_particleTypes);
-        if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper failed to be instantiated in programInit\n";}
 
-        for(int i = 0; i < count_particleTypes; i++){
-            std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   particleInitHelper->name[i]; 
-            std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   particleInitHelper->mass[i]; 
-            std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> particleInitHelper->radius[i]; 
-            std::cout << "Particle " << i + 1 << " Amount: "; std::cin >> particleInitHelper->particleCount[i]; 
-            
-            rgbInput(particleInitHelper->color[i]);
-            // std::cout << "Particle's RGB Color" << std::endl;
-            // std::cout << "Particle " << i + 1 << " R: "; std::cin >> particleInitHelper->color[i].x;
-            // std::cout << "Particle " << i + 1 << " G: "; std::cin >> particleInitHelper->color[i].y;
-            // std::cout << "Particle " << i + 1 << " B: "; std::cin >> particleInitHelper->color[i].z;
-            
-        }
+#include <fstream>
+#include <iostream>
+#include <string>
+
+size_t programInit(class_particleInitHelper*& particleInitHelper){
+  size_t count_particleTypes = 0;
+  
+  std::cout << "Use simulationConfig.txt file? (Enter a zero to decline)" << std::endl;
+  int fileEntry = false;
+  std::cin >> fileEntry;
+  if(fileEntry != 0){
+    count_particleTypes = fileInit(particleInitHelper);
+  }
+
+  if(count_particleTypes == 0){
+    std::cout << std::endl << "-- Declined file input --" << std::endl << std::endl;
+
+    std::cout << "Number of types of particles (Type 0 for defualt): " << std::endl;
+    std::cin >> count_particleTypes;
+
+    if(count_particleTypes != 0){
+      particleInitHelper = new class_particleInitHelper(count_particleTypes);
+      if(particleInitHelper == nullptr){std::cout << "ProgranInitHelper failed to be instantiated in programInit\n";}
+
+      for(int i = 0; i < count_particleTypes; i++){
+          std::cout << "Particle " << i + 1 << " Name: "; std::cin >>   particleInitHelper->name[i]; 
+          std::cout << "Particle " << i + 1 << " Mass: "; std::cin >>   particleInitHelper->mass[i]; 
+          std::cout << "Particle " << i + 1 << " Radius: "; std::cin >> particleInitHelper->radius[i]; 
+          std::cout << "Particle " << i + 1 << " Amount: "; std::cin >> particleInitHelper->particleCount[i]; 
+          
+          rgbInput(particleInitHelper->color[i]);
+      }
+
     }else{
-        count_particleTypes = defaultInit(particleInitHelper); // Temporary test option 
+      count_particleTypes = defaultInit(particleInitHelper); // Temporary test option 
     }
+  }
     return count_particleTypes;
 }
 
@@ -71,4 +85,53 @@ void rgbInput(glm::vec3& color){
     }while(!valid);
 
     color *= 0.01;
+}
+
+size_t fileInit(class_particleInitHelper *&particleInitHelper){
+
+  std::cout << std::endl << "-- Configuring Simulation with Config File --" << std::endl;
+  size_t count_particleTypes = 0;
+
+  std::ifstream configFile("../simulationConfigs.txt");
+  if(configFile.fail()){std::cout << "ERROR: UNABLE TO OPEN simulationConfigs.txt" << std::endl;return 1;}
+
+  std::string stringcount_particleTypes;
+  getline(configFile, stringcount_particleTypes);
+
+  count_particleTypes = std::stoul(stringcount_particleTypes);
+  particleInitHelper = new class_particleInitHelper(count_particleTypes);
+  const int totalHelperElements = 7;
+  
+  for(int i = 0; i < count_particleTypes; i++){
+    
+    particleInitHelper->name[i] = extractString(configFile);
+    
+    particleInitHelper->color[i][0] = std::stof(extractString(configFile));
+    particleInitHelper->color[i][1] = std::stof(extractString(configFile));
+    particleInitHelper->color[i][2] = std::stof(extractString(configFile));
+
+    particleInitHelper->mass[i] = std::stof(extractString(configFile));
+    particleInitHelper->radius[i] = std::stof(extractString(configFile));
+    particleInitHelper->particleCount[i] = std::stof(extractString(configFile));
+
+  }
+
+  configFile.close();
+  return count_particleTypes;
+
+}
+
+std::string extractString(std::ifstream& file){
+  char charInputBuffer;
+  std::string strInputBuffer;
+  
+  bool stop = false;
+  do{
+
+    file >> charInputBuffer;
+    if(charInputBuffer == ','){stop = true; continue;}
+    strInputBuffer += charInputBuffer;
+
+  }while(!stop);
+  return strInputBuffer;
 }

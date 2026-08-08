@@ -47,6 +47,8 @@ int main(){
     
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
+  
+
     if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object inside programStartMenu\n";return -1;}
     
 
@@ -83,6 +85,7 @@ int main(){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
+
     initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.007);
     
     // Shaders Initialization

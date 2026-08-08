@@ -29,24 +29,23 @@ class_particleType::~class_particleType(){
 }
 
 void initParticleProperties(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea, const float speed){
-    const double borderDisplacement = std::cbrt(borderArea) / 2;
+  const double borderDisplacement = std::cbrt(borderArea) / 2;
 
-    std::random_device rd;
-    std::uniform_real_distribution<float>dist(-1.0,1.0);
+  std::random_device rd;
+  std::uniform_real_distribution<float>dist(-1.0,1.0);
 
-    for(int typeN = 0; typeN < countParticleType; typeN++){
-        const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
-        for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
-            particleTypePointer[typeN]->particle[particleN].position = glm::vec3(dist(rd), dist(rd), dist(rd));
-            particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
+  for(int typeN = 0; typeN < countParticleType; typeN++){
+      const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
+      for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
+          particleTypePointer[typeN]->particle[particleN].position = glm::vec3(dist(rd), dist(rd), dist(rd));
+          particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
 
-            particleTypePointer[typeN]->particle[particleN].velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
-            particleTypePointer[typeN]->particle[particleN].velocity *= speed;
+          particleTypePointer[typeN]->particle[particleN].velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
+          particleTypePointer[typeN]->particle[particleN].velocity *= speed;
 
-        }
-    }
-
-    removeOverlap(particleTypePointer, countParticleType, borderDisplacement);
+      }
+  }
+  removeOverlap(particleTypePointer, countParticleType, borderDisplacement);
 }
 
 void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const double borderDisplacement){
