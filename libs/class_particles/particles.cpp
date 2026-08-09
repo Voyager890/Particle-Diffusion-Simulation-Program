@@ -45,7 +45,18 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
 
       }
   }
-  removeOverlap(particleTypePointer, countParticleType, borderDisplacement);
+
+  double totalParticlesVolume = 0;
+  for(int i = 0; i < countParticleType; i++){
+    const double radiusCubed = particleTypePointer[i]->particleRadius * particleTypePointer[i]->particleRadius * particleTypePointer[i]->particleRadius;
+    totalParticlesVolume += particleTypePointer[i]->particleCount * (4.0/3.0) * 3.14 * radiusCubed;
+  }
+  
+  if(0.8 > totalParticlesVolume/borderArea){
+  removeOverlap(particleTypePointer, countParticleType, borderDisplacement); 
+  }else{
+    std::cout << "TOO MANY PARTICLES :: CANNOT FIT INSIDE SIMULATION BORDER :: SKIPPING PARTICLE OVERLAP REMOVAL" << std::endl;
+  }
 }
 
 void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const double borderDisplacement){
