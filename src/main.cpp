@@ -22,6 +22,7 @@
 
 #include <new>
 #include <ostream>
+#include <vector>
 
 // Custom Libraries
 #include "proceduralGeometry/proceduralGeometry.h"
@@ -45,6 +46,9 @@ int main(){
     int iVerticesPerRing = 32;
     float borderArea = 27;
     
+    const float dataHarvestTimeInterval = 5;
+    float nextCollectionTime = 0;
+
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
   
@@ -85,7 +89,7 @@ int main(){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
-
+    
     initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.007);
     
     // Shaders Initialization
@@ -166,7 +170,13 @@ int main(){
 
     // Border Cube buffer object init
     GLuint borderVertexArrayObject = initBorderBuffer((std::cbrt(borderArea)/2.0));
-
+    
+    std::vector<std::vector<size_t>> outputData(particleTypesAmount);
+    size_t* collisionsWithinTimeInterval = new size_t[particleTypesAmount];
+    for(int k = 0; k < particleTypesAmount; k++){
+    outputData[k].push_back(0);
+    collisionsWithinTimeInterval[k] = 0;
+    }
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
@@ -177,8 +187,18 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         count++;
 
-        physicsEngine(particleTypePointer, particleTypesAmount, borderArea); // ISSUE
-
+        // Physics
+        physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); // ISSUE
+        if(glfwGetTime() > nextCollectionTime){
+        
+          for(int k = 0; k < particleTypesAmount; k++){
+          outputData[k].push_back(collisionsWithinTimeInterval[k]); //  PROBLEMATIC LINE
+          collisionsWithinTimeInterval[k] = 0;
+          }
+        do{nextCollectionTime += dataHarvestTimeInterval;}while(glfwGetTime() > nextCollectionTime); // Incase dataHarvestTimeInterval is too small/fps too low.
+        }
+        
+        // Graphics 
         shader_standarad.use();
         shader_standarad.setMat4("camera", cameraInit);
         for(int j = 0; j < particleTypesAmount; j++){
@@ -208,8 +228,18 @@ int main(){
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    
+    // Output resultant data
+    std::cout << std::endl;
+    for(int i = 0; i < particleTypesAmount; i++){
+      for(int j = 0; j < outputData[i].size();j++){
+        std::cout << outputData[i][j] << ",";
+    }
+    std::cout << std::endl;
+  }
 
     delete [] particleTypePointer;
+    delete [] collisionsWithinTimeInterval;
 
     glfwTerminate();
     return 0;

@@ -1,25 +1,26 @@
 #include "physicsEngine.h"
 
 #include <cmath>
+#include <cstddef>
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
 
 #include <iostream>
+#include <iterator>
 #include "class_particles/particles.h"
 #include "debug_tools/debug_tools.h"
 
-void physicsEngine(class_particleType **&particleTypePointer,
-                   const int particleTypesAmount, const float borderArea) {
+void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea, size_t*& collisionsWithinTimeInterval) {
   const double borderDisplacement = std::cbrt(borderArea) / 2.0;
   
   // dual processing? 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
       
-      particleCollisionHandler(particleTypePointer, currentType,
+      collisionsWithinTimeInterval += particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
 
-      borderCollisionHandler(
+      collisionsWithinTimeInterval += borderCollisionHandler(
           particleTypePointer[currentType]->particle[currentParticle],
           particleTypePointer[currentType]->particleRadius, borderDisplacement);
 
@@ -30,9 +31,9 @@ void physicsEngine(class_particleType **&particleTypePointer,
   }
 }
 
-void borderCollisionHandler(class_particle &particle, const float particleRadius, const double &borderDisplacement){
+size_t borderCollisionHandler(class_particle &particle, const float particleRadius, const double &borderDisplacement){
   // Toggles direction based on which axis border was crossed
-
+  size_t numberOfCollision = 0;
   bool borderCollision = false;
 
   do {
@@ -43,6 +44,7 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
       
 
       borderCollision = true;
+      numberOfCollision++;
 
       particle.velocity[i] *= -1;
       const double trespassMagnitude = glm::abs(nextPosition[i]) + particleRadius - borderDisplacement;
@@ -51,10 +53,13 @@ void borderCollisionHandler(class_particle &particle, const float particleRadius
 
     }
   } while (borderCollision);
+
+  return numberOfCollision;
 }
 
-void particleCollisionHandler(class_particleType **&particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount) {
+size_t particleCollisionHandler(class_particleType **&particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount) {
   // To avoid dual proccessing of a particle pair. Start comparing particles after target particles memory location. Particles before it would have already processed itself with target. 
+  size_t numberOfCollision;
   bool firstLoop = true;
 
   for (int currentType = targetIndex; currentType < particleTypesAmount; currentType++) {
@@ -79,6 +84,7 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
 
       if (displacement > maxDisplacement) {continue;}
       
+      numberOfCollision++;
       //debug_instanceCounter(" : Particle collision");
       const double targetMass = particleTypePointer[targetType]->mass;
       const double comperandMass = particleTypePointer[currentType]->mass;
@@ -91,6 +97,7 @@ void particleCollisionHandler(class_particleType **&particleTypePointer, const s
       finalVelocityCalculator(aMass, bMass, aVelocity, bVelocity);
     }
   }
+  return numberOfCollision;
 }
 
 void finalVelocityCalculator(const double aMass, const double bMass, glm::vec3 &aVelocity, glm::vec3 &bVelocity) {
