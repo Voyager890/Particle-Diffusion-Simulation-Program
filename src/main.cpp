@@ -51,7 +51,6 @@ int main(){
 
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
-  
 
     if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object inside programStartMenu\n";return -1;}
     
@@ -89,9 +88,9 @@ int main(){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
-    
+
     initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.007);
-    
+
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
     glm::mat4 cameraInit = glm::mat4(1.0f);
@@ -170,76 +169,77 @@ int main(){
 
     // Border Cube buffer object init
     GLuint borderVertexArrayObject = initBorderBuffer((std::cbrt(borderArea)/2.0));
-    
+  
+    // Output data initialize
     std::vector<std::vector<size_t>> outputData(particleTypesAmount);
-    size_t* collisionsWithinTimeInterval = new size_t[particleTypesAmount];
-    for(int k = 0; k < particleTypesAmount; k++){
-    outputData[k].push_back(0);
-    collisionsWithinTimeInterval[k] = 0;
-    }
+    std::vector<size_t> collisionsWithinTimeInterval(3);
+
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
-        static int count = 0;
-        inputCheck(window, cameraInit);
-        
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        count++;
+      static int count = 0;
+      inputCheck(window, cameraInit);
+      
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      count++;
 
-        // Physics
-        physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); // ISSUE
-        if(glfwGetTime() > nextCollectionTime){
+      // Physics
+      physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); // ISSUE
+      if(glfwGetTime() > nextCollectionTime){
         
-          for(int k = 0; k < particleTypesAmount; k++){
-          outputData[k].push_back(collisionsWithinTimeInterval[k]); //  PROBLEMATIC LINE
-          collisionsWithinTimeInterval[k] = 0;
-          }
+        for(int i = 0; i < particleTypesAmount; i++){
+        std::cout << particleTypePointer[i]->particleName << " : ";
+        std::cout << collisionsWithinTimeInterval[i];
+        outputData[i].push_back(collisionsWithinTimeInterval[i]);
+        collisionsWithinTimeInterval[i] = 0;
+        std::cout << std::endl;
+        }
         do{nextCollectionTime += dataHarvestTimeInterval;}while(glfwGetTime() > nextCollectionTime); // Incase dataHarvestTimeInterval is too small/fps too low.
+      }
+      
+      // Graphics 
+      shader_standarad.use();
+      shader_standarad.setMat4("camera", cameraInit);
+      for(int j = 0; j < particleTypesAmount; j++){
+          glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
+          shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
+          
+        for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
+          
+          positionMatrix = glm::mat4(1.0f);
+          positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
+          shader_standarad.setMat4("motion", positionMatrix);
+          glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
         }
-        
-        // Graphics 
-        shader_standarad.use();
-        shader_standarad.setMat4("camera", cameraInit);
-        for(int j = 0; j < particleTypesAmount; j++){
-            glBindVertexArray(particleTypePointer[j]->vertexArrayObject);
-            shader_standarad.setVec3("objectColor", particleTypePointer[j]->objectColor);
-            
-            for(int i = 0; i < particleTypePointer[j]->particleCount; i++){
-                
-                positionMatrix = glm::mat4(1.0f);
-                positionMatrix = glm::translate(positionMatrix, particleTypePointer[j]->particle[i].position);
-                shader_standarad.setMat4("motion", positionMatrix);
-                glDrawElements(GL_TRIANGLES, bufferObjectsInitHelper.eboCapacity, GL_UNSIGNED_INT, 0);
-                
-            }
-        }
-        
-        
-        shader_lightSource.use();
-        shader_lightSource.setMat4("camera", cameraInit);
-        glBindVertexArray(lightSourceVAO);
+      }
+      
+      
+      shader_lightSource.use();
+      shader_lightSource.setMat4("camera", cameraInit);
+      glBindVertexArray(lightSourceVAO);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        
-        glBindVertexArray(borderVertexArrayObject);
-        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+      glDrawArrays(GL_TRIANGLES, 0, 3);
+      
+      glBindVertexArray(borderVertexArrayObject);
+      glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+      glBindVertexArray(0);
+      glfwSwapBuffers(window);
+      glfwPollEvents();
     }
     
     // Output resultant data
-    std::cout << std::endl;
+    std::cout << "OUTPUTTING RESULTANT DATA" << std::endl;
     for(int i = 0; i < particleTypesAmount; i++){
+      std::cout << particleTypePointer[i]->particleName << " : ";
       for(int j = 0; j < outputData[i].size();j++){
         std::cout << outputData[i][j] << ",";
-    }
+      }
     std::cout << std::endl;
-  }
+    }
+    std::cout << "END"<< std::endl;
 
     delete [] particleTypePointer;
-    delete [] collisionsWithinTimeInterval;
 
     glfwTerminate();
     return 0;
@@ -264,7 +264,7 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     // Pitch / Lateral
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians( rotationSensitivity), glm::vec3(1.0f, 0.0f, 0.0f));}
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(1.0f, 0.0f, 0.0f));}
-    // Roll / Longitudanal
+    // Roll / Longitudanal/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build
     if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians( rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){matrix = glm::rotate(matrix, glm::radians(-rotationSensitivity), glm::vec3(0.0f, 0.0f, 1.0f));}
 

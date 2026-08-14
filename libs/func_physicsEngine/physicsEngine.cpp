@@ -7,20 +7,23 @@
 
 #include <iostream>
 #include <iterator>
+#include <vector>
 #include "class_particles/particles.h"
 #include "debug_tools/debug_tools.h"
 
-void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea, size_t*& collisionsWithinTimeInterval) {
+void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea, std::vector<size_t>& collisionsWithinTimeInterval) {
   const double borderDisplacement = std::cbrt(borderArea) / 2.0;
   
   // dual processing? 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
       
-      collisionsWithinTimeInterval += particleCollisionHandler(particleTypePointer, currentType,
+      collisionsWithinTimeInterval.at(currentType) +=
+        particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
 
-      collisionsWithinTimeInterval += borderCollisionHandler(
+      collisionsWithinTimeInterval.at(currentType) +=
+        borderCollisionHandler(
           particleTypePointer[currentType]->particle[currentParticle],
           particleTypePointer[currentType]->particleRadius, borderDisplacement);
 
@@ -59,7 +62,7 @@ size_t borderCollisionHandler(class_particle &particle, const float particleRadi
 
 size_t particleCollisionHandler(class_particleType **&particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount) {
   // To avoid dual proccessing of a particle pair. Start comparing particles after target particles memory location. Particles before it would have already processed itself with target. 
-  size_t numberOfCollision;
+  size_t numberOfCollision = 0;
   bool firstLoop = true;
 
   for (int currentType = targetIndex; currentType < particleTypesAmount; currentType++) {

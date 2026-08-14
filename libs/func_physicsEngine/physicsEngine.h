@@ -4,7 +4,7 @@
 #include "class_particles/particles.h"
 #include <cstddef>
 #include <glm/vec3.hpp>
-void physicsEngine(class_particleType**& particleTypePointer, const int particleTypesAmount, const float borderArea, size_t*& collisionsWithinTimeInterval);
+void physicsEngine(class_particleType**& particleTypePointer, const int particleTypesAmount, const float borderArea, std::vector<size_t>& collisionsWithinTimeInterval);
 size_t borderCollisionHandler(class_particle& particle, const float particleRadius, const double& borderDisplacement);
 size_t particleCollisionHandler(class_particleType**& particleTypePointer, const size_t targetType, const size_t targetIndex, const size_t particleTypesAmount);
 
