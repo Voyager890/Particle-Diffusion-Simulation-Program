@@ -81,7 +81,6 @@ int main(){
     
     
     // Particle class initialization
-
     class_particleType** particleTypePointer = nullptr;
     particleTypePointer = new class_particleType*[2];
     for(int i = 0; i < particleTypesAmount; i++){
@@ -89,7 +88,7 @@ int main(){
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
 
-    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.007);
+    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.01);
 
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
@@ -172,7 +171,7 @@ int main(){
   
     // Output data initialize
     std::vector<std::vector<size_t>> outputData(particleTypesAmount);
-    std::vector<size_t> collisionsWithinTimeInterval(3);
+    std::vector<size_t> collisionsWithinTimeInterval(particleTypesAmount);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
@@ -189,13 +188,14 @@ int main(){
       if(glfwGetTime() > nextCollectionTime){
         
         for(int i = 0; i < particleTypesAmount; i++){
-        std::cout << particleTypePointer[i]->particleName << " : ";
-        std::cout << collisionsWithinTimeInterval[i];
+        //std::cout << particleTypePointer[i]->particleName << " : ";
+        //std::cout << collisionsWithinTimeInterval[i];
         outputData[i].push_back(collisionsWithinTimeInterval[i]);
         collisionsWithinTimeInterval[i] = 0;
-        std::cout << std::endl;
+        //std::cout << std::endl;
         }
         do{nextCollectionTime += dataHarvestTimeInterval;}while(glfwGetTime() > nextCollectionTime); // Incase dataHarvestTimeInterval is too small/fps too low.
+        //std::cout << std::endl;
       }
       
       // Graphics 

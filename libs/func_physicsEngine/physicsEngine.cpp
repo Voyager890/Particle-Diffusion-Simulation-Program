@@ -21,12 +21,13 @@ void physicsEngine(class_particleType **&particleTypePointer, const int particle
       collisionsWithinTimeInterval.at(currentType) +=
         particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
-
+      //std::cout << currentType << " After P-P check"<< collisionsWithinTimeInterval[currentType] << std::endl;
       collisionsWithinTimeInterval.at(currentType) +=
         borderCollisionHandler(
           particleTypePointer[currentType]->particle[currentParticle],
           particleTypePointer[currentType]->particleRadius, borderDisplacement);
 
+      //std::cout << currentType << " After P-C check"<< collisionsWithinTimeInterval[currentType] << std::endl << std::endl;
       particleTypePointer[currentType]->particle[currentParticle].position += particleTypePointer[currentType]->particle[currentParticle].velocity + particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer;
       particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer = glm::vec3(0.0);
       
@@ -65,7 +66,7 @@ size_t particleCollisionHandler(class_particleType **&particleTypePointer, const
   size_t numberOfCollision = 0;
   bool firstLoop = true;
 
-  for (int currentType = targetIndex; currentType < particleTypesAmount; currentType++) {
+  for (int currentType = targetType; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
 
       if (firstLoop){
@@ -73,6 +74,8 @@ size_t particleCollisionHandler(class_particleType **&particleTypePointer, const
         currentParticle = targetIndex;
         continue;
       }
+        
+      if (currentType == targetType && currentParticle == targetIndex){continue;}
 
       const class_particle &target = particleTypePointer[targetType]->particle[targetIndex];
       const class_particle &comperand = particleTypePointer[currentType]->particle[currentParticle];
@@ -84,11 +87,10 @@ size_t particleCollisionHandler(class_particleType **&particleTypePointer, const
       const float displacement = glm::length(vectorDifference);
 
       const double maxDisplacement = particleTypePointer[targetType]->particleRadius + particleTypePointer[currentType]->particleRadius;
-
+      
       if (displacement > maxDisplacement) {continue;}
       
       numberOfCollision++;
-      //debug_instanceCounter(" : Particle collision");
       const double targetMass = particleTypePointer[targetType]->mass;
       const double comperandMass = particleTypePointer[currentType]->mass;
 
