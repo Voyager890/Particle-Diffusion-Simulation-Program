@@ -12,4 +12,5 @@ size_t fileInit(class_particleInitHelper*& particleInitHelper);
 std::string extractString(std::ifstream& file);
 void rgbInput(glm::vec3& color);
 
+bool areOptionsValid(const class_particleInitHelper*& particleInitHelper, const size_t count_particleTypes);
 #endif

@@ -42,7 +42,10 @@ size_t programInit(class_particleInitHelper*& particleInitHelper){
       count_particleTypes = defaultInit(particleInitHelper); // Temporary test option 
     }
   }
-    return count_particleTypes;
+
+  if(areOptionsValid(particleInitHelper, count_particleTypes) && count_particleTypes >= 0){
+  }
+  return count_particleTypes;
 }
 
 size_t defaultInit(class_particleInitHelper*& particleInitHelper){
@@ -134,4 +137,29 @@ std::string extractString(std::ifstream& file){
 
   }while(!stop);
   return strInputBuffer;
+}
+
+bool areOptionsValid(const class_particleInitHelper*& particleInitHelper, const size_t count_particleTypes){
+  bool validity = true;
+
+  std::cout  << std::endl << "-- Validating Input Configurations --" << std::endl;
+  
+  for(int i = 0; i < count_particleTypes; i++){
+
+    if(*particleInitHelper[i].mass <= 0){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << std::endl;
+      std::cout << "MASS MUST BE GREATER THAN ZERO" << std::endl;
+    }
+
+    if(*particleInitHelper[i].radius <= 0){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << std::endl;
+      std::cout << "RADIUS MUST BE GREATER THAN ZERO" << std::endl;
+    }
+
+    if(*particleInitHelper[i].particleCount < 0 || *particleInitHelper[i].particleCount > 10000){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << std::endl;
+      std::cout << "PARTICLE COUNT MUST BE IN RANGE 1 - asfjakfjiajf INCLUSIVE" << std::endl;
+    }
+  }
+  return validity;
 }
