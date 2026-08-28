@@ -2,15 +2,17 @@
 #define PROGRAM_START_MENU
 
 #include "class_particleInitHelper/particleInitHelper.h"
-#include <cstddef>
 
-size_t programInit(class_particleInitHelper*& particleInitHelper);
-size_t defaultInit(class_particleInitHelper*& particleInitHelper);
-size_t fileInit(class_particleInitHelper*& particleInitHelper);
+void programInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea);
+
+
+void defaultInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea);
+void manualInit (class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea);
+void fileInit   (class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea);
 
 
 std::string extractString(std::ifstream& file);
 void rgbInput(glm::vec3& color);
 
-bool areOptionsValid(const class_particleInitHelper*& particleInitHelper, const size_t count_particleTypes);
+bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int count_particleTypes, const int borderArea);
 #endif

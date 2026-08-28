@@ -43,16 +43,20 @@ void resize_callback(GLFWwindow* window,int width, int height);
 
 int main(){
     // Initialize the required parameters
-    int iVerticesPerRing = 32;
-    float borderArea = 27;
+    int iVerticesPerRing = 32; // MUST BE A POWER OF 2
+    float borderArea = 27; 
+    
+
     
     const float dataHarvestTimeInterval = 5;
     float nextCollectionTime = 0;
 
     class_particleInitHelper* particleInitHelper = nullptr;
-    int particleTypesAmount = programInit(particleInitHelper); // Sends user to programStartMenu
-
-    if(particleInitHelper == nullptr){std::cout << "Failed to initialize particleInitHelper object inside programStartMenu\n";return -1;}
+    int particleTypesAmount = 0;
+    programInit(particleInitHelper, particleTypesAmount, borderArea); // Sends user to programStartMenu
+    
+    if(particleTypesAmount < 1){std::cout << "THERE WAS AN ERROR IN THE ProgramStartMenu()\n"; return -1;}
+    if(particleInitHelper == nullptr){std::cout << "FAILED TO INITIALIZE THE PARTICLEINITHELPER IN THE ProgramStartMenu()\n";return -1;}
     
 
     glm::vec3 lightSourceOrigin(0.0f, 0.0f, 0.0f);   
