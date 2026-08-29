@@ -87,7 +87,7 @@ int main(){
     
     // Particle class initialization
     class_particleType** particleTypePointer = nullptr;
-    particleTypePointer = new class_particleType*[2];
+    particleTypePointer = new class_particleType*[particleTypesAmount];
     for(int i = 0; i < particleTypesAmount; i++){
         particleTypePointer[i] = new class_particleType(particleInitHelper->name[i], particleInitHelper->color[i], particleInitHelper->mass[i], particleInitHelper->radius[i], particleInitHelper->particleCount[i]);
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
@@ -182,7 +182,8 @@ int main(){
     // Output data initialize
     std::vector<std::vector<size_t>> outputData(particleTypesAmount);
     std::vector<size_t> collisionsWithinTimeInterval(particleTypesAmount);
-
+    
+    std::cout << std::endl << "-- Starting simulation --" << std::endl;
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
