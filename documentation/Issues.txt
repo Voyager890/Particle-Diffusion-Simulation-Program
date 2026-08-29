@@ -40,3 +40,9 @@ collision detection systems use expensive root functions. Minimize them.
 
 If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
 in the physics engine in a enldess loop.
+
+
+the current system of spawning particles and infinity looping to remove overlap is vulnerable. The checks effectiveness reduces significiently if there are few large particles compared to many small particles. If this method is to be kept, a more accurate and mathematically pure threshold must be determined. Also there must be instructions incase of a infinite loop incident.
+
+Currently the file reading method does not handle invalid syntax elegently/in a defined matter.
+

@@ -9,17 +9,18 @@
 
 void programInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea){
 
-  std::cout << std::endl << "-- Enter the number of an option from below --" << std::endl
-                         << " 1 : Defualt Values" << std::endl 
-                         << " 2 : Manual CLI Entry" << std::endl
-                         << " 3 : File Entry" << std::endl;
-  int option = 0;
-  std::cin >> option;
-  
   bool initComplete = false;
   bool initValid = false;
+
   do{
 
+    std::cout << std::endl << "-- Enter the number of an option from below --" << std::endl
+                          << " 1 : Defualt Values" << std::endl 
+                          << " 2 : Manual CLI Entry" << std::endl
+                          << " 3 : File Entry" << std::endl;
+    int option = 0;
+    std::cin >> option;
+    
     switch(option){
       case 1:
         defaultInit(particleInitHelper, count_particleTypes, borderArea);
@@ -139,8 +140,14 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
   
   std::string stringcount_particleTypes;
   getline(configFile, stringcount_particleTypes);
-
   count_particleTypes = std::stoul(stringcount_particleTypes);
+
+  if(count_particleTypes < 1){return;}
+  
+  std::string string_borderArea;
+  getline(configFile, string_borderArea);
+  borderArea = std::stof(string_borderArea);
+
   particleInitHelper = new class_particleInitHelper(count_particleTypes);
   const int totalHelperElements = 7;
   
@@ -195,17 +202,17 @@ bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int cou
   for(int i = 0; i < count_particleTypes; i++){
 
     if(particleInitHelper->mass[i] <= 0){
-      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " || MASS MUST BE GREATER THAN ZERO" << std::endl;
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = MASS MUST BE GREATER THAN ZERO" << std::endl;
       validity = false;
     }
 
     if(particleInitHelper->radius[i] <= 0){
-      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " || RADIUS MUST BE GREATER THAN ZERO" << std::endl;
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = RADIUS MUST BE GREATER THAN ZERO" << std::endl;
       validity = false;
     }
 
     if(particleInitHelper->particleCount[i] < 0 || particleInitHelper->particleCount[i] > 10000){
-      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " || PARTICLE COUNT MUST BE IN RANGE 1 - 10,000 INCLUSIVE" << std::endl;
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = PARTICLE COUNT MUST BE IN RANGE 1 - 10,000 INCLUSIVE" << std::endl;
       validity = false;
     }
   }
@@ -219,7 +226,7 @@ bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int cou
     }
     const float maxThresholdRatio = 0.8;
     if(maxThresholdRatio <= (totalParticlesVolume/borderArea)){
-      std::cout << "TOO MANY PARTICLES :: CANNOT FIT INSIDE SIMULATION BORDER" << std::endl;
+      std::cout << "TOTAL PARTICLE VOLUME TOO GREAT. CANNOT REASONABLY FIT ALL PARTICLES (CURRENT maxThresholdRatio is " << maxThresholdRatio << ")" << std::endl;
       validity = false;
     }
   }

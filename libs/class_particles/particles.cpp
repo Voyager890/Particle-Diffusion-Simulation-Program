@@ -53,6 +53,7 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
   }
   
   if(0.8 > totalParticlesVolume/borderArea){
+  std::cout << std::endl << "-- Proceeding to remove overlap --" << std::endl;
   removeOverlap(particleTypePointer, countParticleType, borderDisplacement); 
   }else{
     std::cout << "TOO MANY PARTICLES :: CANNOT FIT INSIDE SIMULATION BORDER :: SKIPPING PARTICLE OVERLAP REMOVAL" << std::endl;

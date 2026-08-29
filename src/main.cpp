@@ -44,7 +44,7 @@ void resize_callback(GLFWwindow* window,int width, int height);
 int main(){
     // Initialize the required parameters
     int iVerticesPerRing = 32; // MUST BE A POWER OF 2
-    float borderArea = 27; 
+    float borderArea = 27;
     
 
     
@@ -54,6 +54,7 @@ int main(){
     class_particleInitHelper* particleInitHelper = nullptr;
     int particleTypesAmount = 0;
     programInit(particleInitHelper, particleTypesAmount, borderArea); // Sends user to programStartMenu
+    std::cout << std::endl << "-- Successfuly initialized simulation variables --" << std::endl;
     
     if(particleTypesAmount < 1){std::cout << "THERE WAS AN ERROR IN THE ProgramStartMenu()\n"; return -1;}
     if(particleInitHelper == nullptr){std::cout << "FAILED TO INITIALIZE THE PARTICLEINITHELPER IN THE ProgramStartMenu()\n";return -1;}
@@ -97,8 +98,13 @@ int main(){
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
     glm::mat4 cameraInit = glm::mat4(1.0f);
-    glm::vec3 cameraPosition(0.0f, 0.0f, -6.0f);
-    cameraInit = glm::translate(cameraInit, cameraPosition);
+
+    glm::vec3 startingCameraDistance(0.0f, 0.0f, -6.0f);
+    const double halfBorderLength = std::sqrt(borderArea) / 2.0;
+    const glm::vec3 startingCameraOffset(0.0f, 0.0f, -halfBorderLength);
+
+    startingCameraDistance += startingCameraOffset; 
+    cameraInit = glm::translate(cameraInit, startingCameraDistance);
     glm::mat4 positionMatrix = glm::mat4(1.0f);
 
     Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
