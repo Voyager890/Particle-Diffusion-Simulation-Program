@@ -1,10 +1,12 @@
 #include "programStartMenu.h"
 
 #include "class_particleInitHelper/particleInitHelper.h"
+#include <cstddef>
 #include <glm/ext/vector_float3.hpp>
 
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include <string>
 
 void programInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea){
@@ -151,35 +153,75 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
   particleInitHelper = new class_particleInitHelper(count_particleTypes);
   const int totalHelperElements = 7;
   
+  int currentElement = 1;
+  int errorFlag = 0;
   for(int i = 0; i < count_particleTypes; i++){
-    
-    particleInitHelper->name[i] = extractString(configFile);
-    
-    particleInitHelper->color[i][0] = std::stof(extractString(configFile));
-    particleInitHelper->color[i][1] = std::stof(extractString(configFile));
-    particleInitHelper->color[i][2] = std::stof(extractString(configFile));
+    currentElement = 1;
 
-    particleInitHelper->mass[i] = std::stof(extractString(configFile));
-    particleInitHelper->radius[i] = std::stof(extractString(configFile));
-    particleInitHelper->particleCount[i] = std::stof(extractString(configFile));
 
+    particleInitHelper->name[i] = extractString(configFile, currentElement, errorFlag);
+    if(errorFlag != 0){break;}
+    
+    particleInitHelper->color[i][0] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+    particleInitHelper->color[i][1] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+    particleInitHelper->color[i][2] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+
+    particleInitHelper->mass[i] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+    particleInitHelper->radius[i] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+    particleInitHelper->particleCount[i] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
+
+  }
+
+  switch(errorFlag){
+    case 1:
+      std::cout << "ERROR at element : " << currentElement << " : Expected more statments but encountered a  ';' indicating the number of elements provided for the particle type were less than the required amount" << std::endl;
+      break;
+    case 2:
+      std::cout << "ERROR at element : " << currentElement << " : Expcted end of particle type elements but encounted a ',' indicating that the number of elements provided for the particle type were more than the required amount" << std::endl;
+     break;
+    case 3:
+      std::cout << "ERROR : Program tried to read beyond required number of elements for a given particle type" << std::endl;
+      break;
+    case 4:
+      std::cout << "ERROR : Program started reading past end of file. Thus a element/particle type description termination character may be missing, or number of data types is input wrong" << std::endl;
+      break;
   }
 
   configFile.close();
 }
 
-std::string extractString(std::ifstream& file){
+std::string extractString(std::ifstream& file, int& currentElement, int& errorFlag){
+  const size_t totalNumberOfElements = 7;
+
   char charInputBuffer;
   std::string strInputBuffer;
   
   bool stop = false;
   do{
+    if(file >> charInputBuffer){
 
-    file >> charInputBuffer;
-    if(charInputBuffer == ','){stop = true; continue;}
-    strInputBuffer += charInputBuffer;
+      if(currentElement < totalNumberOfElements){
+        if(charInputBuffer == ','){stop = true; continue;}
+        if(charInputBuffer == ';'){stop = true; errorFlag = 1; continue;}
+      }
+      if(currentElement == totalNumberOfElements){
+        if(charInputBuffer == ','){stop = true; errorFlag = 2;continue;}
+        if(charInputBuffer == ';'){stop = true; continue;}
+      }
+      if(currentElement > totalNumberOfElements){stop == true; errorFlag = 3; continue;}
 
+      strInputBuffer += charInputBuffer;
+
+    }else{stop = true; errorFlag = 4; continue;} // IF file reached EOF
   }while(!stop);
+
+  currentElement++;
   return strInputBuffer;
 }
 

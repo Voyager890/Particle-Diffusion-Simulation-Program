@@ -46,3 +46,4 @@ the current system of spawning particles and infinity looping to remove overlap 
 
 Currently the file reading method does not handle invalid syntax elegently/in a defined matter.
 
+Currently no inputs are validated for character inputs, "crashing" the program every time. 

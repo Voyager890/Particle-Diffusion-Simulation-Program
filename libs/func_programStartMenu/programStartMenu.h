@@ -11,7 +11,7 @@ void manualInit (class_particleInitHelper*& particleInitHelper, int& count_parti
 void fileInit   (class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea);
 
 
-std::string extractString(std::ifstream& file);
+std::string extractString(std::ifstream& file, int& currentElement, int& errorFlag);
 void rgbInput(glm::vec3& color);
 
 bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int count_particleTypes, const int borderArea);
