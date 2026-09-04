@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <locale>
+#include <stdexcept>
 #include <string>
 
 void programInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea){
@@ -19,7 +20,8 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
     std::cout << std::endl << "-- Enter the number of an option from below --" << std::endl
                           << " 1 : Defualt Values" << std::endl 
                           << " 2 : Manual CLI Entry" << std::endl
-                          << " 3 : File Entry" << std::endl;
+                          << " 3 : File Entry" << std::endl
+                          << " 4 : Quit program" << std::endl;
     int option = 0;
     std::cin >> option;
     
@@ -36,6 +38,9 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
         fileInit(particleInitHelper, count_particleTypes, borderArea);
         initComplete = true;
         break;
+      case 4:
+          return;
+          break;
       default:
         std::cout << "INVALID ENTRY, TRY AGAIN" << std::endl;
         initComplete = false;
@@ -47,11 +52,16 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
       if(!initValid){
         delete particleInitHelper;
         initComplete = false;
+
+        std::cout << std::endl << "-- TRY AGAIN --" << std::endl;
+      }else{
+        std::cout << std::endl << "-- Successfuly initialized simulation variables --" << std::endl;
       }
     }
 
   }while(!(initComplete && initValid));
 
+  return;
 }
 
 void defaultInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea){
@@ -142,13 +152,27 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
   
   std::string stringcount_particleTypes;
   getline(configFile, stringcount_particleTypes);
-  count_particleTypes = std::stoul(stringcount_particleTypes);
+  try{
+    count_particleTypes = std::stoul(stringcount_particleTypes);
+  }
+  catch(std::invalid_argument& e){
+    std::cout << "Caught exception : " << e.what() << std::endl;
+    std::cout << "This means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
+    return;
+  }
 
   if(count_particleTypes < 1){return;}
   
   std::string string_borderArea;
   getline(configFile, string_borderArea);
-  borderArea = std::stof(string_borderArea);
+  try{
+    borderArea = std::stof(string_borderArea);
+  }
+  catch(std::invalid_argument& e){
+    std::cout << "Caught exception : " << e.what() << std::endl;
+    std::cout << "This means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
+    return;
+  }
 
   particleInitHelper = new class_particleInitHelper(count_particleTypes);
   const int totalHelperElements = 7;
@@ -228,8 +252,9 @@ std::string extractString(std::ifstream& file, int& currentElement, int& errorFl
 bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int count_particleTypes, const int borderArea){
   bool validity = true;
 
+  if(particleInitHelper == nullptr){return false;}
+
   std::cout  << std::endl << "-- Validating Input Configurations --" << std::endl;
-  
 
   if(count_particleTypes < 1){
     std::cout << "ERROR: THERE MUST BE A POSITIVE INTEGER VALUE FOR THE count_particleTypes\n";

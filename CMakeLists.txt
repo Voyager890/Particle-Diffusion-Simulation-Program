@@ -25,7 +25,7 @@ src/main.cpp
 )
 
 # UPDATE BEFORE FINAL RELEASE
-target_compile_options(Diffusion PRIVATE -fsanitize=address -g -fno-omit-frame-pointer)
+target_compile_options(Diffusion PRIVATE -fsanitize=address -g -fno-omit-frame-pointer -Wall)
 target_link_options(Diffusion PRIVATE -fsanitize=address)
 
 target_link_libraries(Diffusion PRIVATE

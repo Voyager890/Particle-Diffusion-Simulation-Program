@@ -56,6 +56,7 @@ int main(){
     programInit(particleInitHelper, particleTypesAmount, borderArea); // Sends user to programStartMenu
     std::cout << std::endl << "-- Successfuly initialized simulation variables --" << std::endl;
     
+    if(particleTypesAmount == 0){std::cout << " -- Terminating program --" << std::endl;return 0;}
     if(particleTypesAmount < 1){std::cout << "THERE WAS AN ERROR IN THE ProgramStartMenu()\n"; return -1;}
     if(particleInitHelper == nullptr){std::cout << "FAILED TO INITIALIZE THE PARTICLEINITHELPER IN THE ProgramStartMenu()\n";return -1;}
     
@@ -187,26 +188,20 @@ int main(){
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
-      static int count = 0;
       inputCheck(window, cameraInit);
       
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      count++;
 
       // Physics
       physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); // ISSUE
       if(glfwGetTime() > nextCollectionTime){
         
         for(int i = 0; i < particleTypesAmount; i++){
-        //std::cout << particleTypePointer[i]->particleName << " : ";
-        //std::cout << collisionsWithinTimeInterval[i];
         outputData[i].push_back(collisionsWithinTimeInterval[i]);
         collisionsWithinTimeInterval[i] = 0;
-        //std::cout << std::endl;
         }
         do{nextCollectionTime += dataHarvestTimeInterval;}while(glfwGetTime() > nextCollectionTime); // Incase dataHarvestTimeInterval is too small/fps too low.
-        //std::cout << std::endl;
       }
       
       // Graphics 
@@ -243,7 +238,7 @@ int main(){
     std::cout << "OUTPUTTING RESULTANT DATA" << std::endl;
     for(int i = 0; i < particleTypesAmount; i++){
       std::cout << particleTypePointer[i]->particleName << " : ";
-      for(int j = 0; j < outputData[i].size();j++){
+      for(int j = 0; j < (int)outputData[i].size(); j++){
         std::cout << outputData[i][j] << ",";
       }
     std::cout << std::endl;

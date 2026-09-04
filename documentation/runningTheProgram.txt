@@ -11,11 +11,13 @@ Replace contents inside parentheses with described contents and remove parenthes
 text after "//" are comments giving additional information, do not include them in the actual file. Do not write in bare decimal point eg (.8, .1, .45).
 Write the leading zero before the decimal point eg:(0.8, 0.1, 0.45).
 Leave no empty space in each line. Names with spaces in them are not supported.
+All seven properties of a particle must be described here
+At the end of describing the properties of a particle, end the line with a ';' character.
 ---------------------------------------------------------------------------------------------------
 (NumberOfParticleTypes)
 (SimulationBorderArea)
-(ParticleTypeName),(ParticlesColorRedValue),(ParticlesColorGreenValue),(ParticlesColorBlueValue),(ParticlesMass),(ParticleRadius),(NumberOfParticles),
-(ParticleTypeName2),(ParticlesColorRedValue2),(ParticlesColorGreenValue2),(ParticlesColorBlueValue2),(ParticlesMass2),(ParticleRadius2),(NumberOfParticles2),
+(ParticleTypeName),(ParticlesColorRedValue),(ParticlesColorGreenValue),(ParticlesColorBlueValue),(ParticlesMass),(ParticleRadius),(NumberOfParticles);
+(ParticleTypeName2),(ParticlesColorRedValue2),(ParticlesColorGreenValue2),(ParticlesColorBlueValue2),(ParticlesMass2),(ParticleRadius2),(NumberOfParticles2);
 //so on...
 ---------------------------------------------------------------------------------------------------Below is an example within the '-' borders. It describes configuring 3 particle types. With a simulation border area of 27 (thus the sides of the cube are 3 units).
 First has the particle type name Carbon and it has rgb color values 0,0,0 (black), has 12 mass, has a radius of 1, and there exists 2 of it.
@@ -24,9 +26,9 @@ Lastly is the particle type name Oxygen which is colored a light blue with rgb v
 ---------------------------------------------------------------------------------------------------
 3
 27
-Carbon,0,0,0,12,1,2,
-Hydrogen,0,1,0,1,0.1,1,
-Oxygen, 0.7,1,0.7,16,0.5,2,
+Carbon,0,0,0,12,1,2;
+Hydrogen,0,1,0,1,0.1,1;
+Oxygen, 0.7,1,0.7,16,0.5,2;
 ---------------------------------------------------------------------------------------------------
 
-To close the program press the "escape" key.
+To close the program press the escape ("esc") key.
