@@ -1,7 +1,7 @@
 Currently the vertex buffer object data generator calculates the x and y coordinate of each vertex every layer.
 Instead the vertices of one ring can be calculated and assigned onto the rest of the layers. After that, the vertex
 data in each layer can be multiplied with the radius scaler (obtained by pitch trig calc) corresponding to that layer.
-This would help with program start time especially if many verticesPerRing or particle types are used.
+This would help with program start time especially if many verticesPerRing or particle types are used.(LOW)
 
 Since currently the only valid verticesPerRing input are powers of 2. There will be a even number of vertices
 per ring. Since the algorytm calculates spacing between vertices by diving 2 pi radians by vertices per ring, 
@@ -9,41 +9,33 @@ there will be a duplicate set of absaloute values per vertex. So instead of calc
 could calculate just half the vertices with the trigomenetric functions. And mirror this half by flipping the 
 sign of the values. This would slightly improve program start time especially if many verticesPerRings were
 input or particle types are used. Howver I do not believe this performance boost is worth the loss of the current 
-algorithms readablity.  
+algorithms readablity.  (LOW)
 
 Currently the ebo generation functions work differently even though they can be refactored to all be a 
-similar algorythm. This would help with readablity.
+similar algorythm. This would help with readablity.(MEDIUM)
 
 Currently the bufferObjects generation functions use unsigned ints or floats. This will cause problems if
 there is a very large number of vertices per ring count. Even though the graphical fidelity of the spheres
 would not change past a certain value of vertices per ring, The allowance of a value so large is a problem.
-calculate a reasonable threshold and validate inputs. Also use unsigned long long/double types in the functions.
+calculate a reasonable threshold and validate inputs. Also use unsigned long long/double types in the functions.(MEDIUM)
 
 During developement, not much care was given to freeing dynamically allocated memory. Thus memory
 leaks may occur. For example, the particleType class pointer pointer object may not be cleaned up
-properly.
+properly.(HIGH)
 
 Currenlty GPU memory cleanup is handled soley by OS. Dynamic buffer objects will cause gpu memory
-leaks.
+leaks.(HIGH)
 
-Currently the border collision handler seems to loop around a set circuit
+Currently the border collision handler seems to loop around a set circuit(HIGH)
 
 Current particle collision detection system is very expensive. It loops through ever member particle
 and then compares it with every other member particle in another loop. Heavily increased overhead and
-runtime offset.
+runtime offset.(MEDIUM)
 
-Particles sometimes stick to eachother when they collide. This must be because the particele collisions
-currently work in the present context. Move collision detection to take future context as input similar 
-to border collision detection.
-
-collision detection systems use expensive root functions. Minimize them.
+collision detection systems use expensive root functions. Minimize them.(MEDIUM)
 
 If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
-in the physics engine in a enldess loop.
+in the physics engine in a enldess loop.(MEDIUM)
 
+the current system of spawning particles and infinity looping to remove overlap is vulnerable. The checks effectiveness reduces significiently if there are few large particles compared to many small particles. If this method is to be kept, a more accurate and mathematically pure threshold must be determined. Also there must be instructions incase of a infinite loop incident.(HIGH)
 
-the current system of spawning particles and infinity looping to remove overlap is vulnerable. The checks effectiveness reduces significiently if there are few large particles compared to many small particles. If this method is to be kept, a more accurate and mathematically pure threshold must be determined. Also there must be instructions incase of a infinite loop incident.
-
-Currently the file reading method does not handle invalid syntax elegently/in a defined matter.
-
-Currently no inputs are validated for character inputs, "crashing" the program every time. 

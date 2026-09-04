@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <locale>
 #include <stdexcept>
 #include <string>
@@ -23,7 +24,7 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
                           << " 3 : File Entry" << std::endl
                           << " 4 : Quit program" << std::endl;
     int option = 0;
-    std::cin >> option;
+    option = doubleUserInput();
     
     switch(option){
       case 1:
@@ -97,10 +98,10 @@ void manualInit (class_particleInitHelper*& particleInitHelper, int& count_parti
   do{
 
   std::cout << "Enter the number of types of particles (must be a positive integer)" << std::endl;
-  std::cin >> count_particleTypes;
+   count_particleTypes = doubleUserInput();
 
   std::cout << "Enter border area (must be a positive value)" << std::endl;
-  std::cin >> borderArea;
+  borderArea = doubleUserInput();
   
   }while(count_particleTypes < 1 && borderArea > 0);
   
@@ -110,15 +111,17 @@ void manualInit (class_particleInitHelper*& particleInitHelper, int& count_parti
   for(int i = 0; i < count_particleTypes; i++){
     std::cout << "Enter name of particle type " << i + 1 << std::endl;
     std::cin >> particleInitHelper->name[i];
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::cout << "Enter the mass of particle type " << i + 1 << std::endl;
-    std::cin >> particleInitHelper->mass[i];
+    particleInitHelper->mass[i] = doubleUserInput();
 
     std::cout << "Enter the radius of particle type " << i + 1 << std::endl;
-    std::cin >> particleInitHelper->radius[i];
+    particleInitHelper->radius[i] = doubleUserInput();
 
     std::cout << "Enter the number of particle belonging to the particle type " << i + 1 << std::endl;
-    std::cin >> particleInitHelper->particleCount[i];
+     particleInitHelper->particleCount[i] = doubleUserInput();
 
     rgbInput(particleInitHelper->color[i]);
     
@@ -128,11 +131,11 @@ void rgbInput(glm::vec3& color){
     bool valid = false;
     do{
         std::cout << "Enter particle's RGB color percentage" << std::endl;
-        std::cout << "R%: "; std::cin >> color.x;
+        std::cout << "R%: "; color.x = doubleUserInput();
         valid = (color.x <= 100 && color.x >= 0) ? true : false;
-        std::cout << "G%: "; std::cin >> color.y;
+        std::cout << "G%: "; color.y = doubleUserInput();
         valid = (color.y <= 100 && color.y >= 0) ? true : false;
-        std::cout << "B%: "; std::cin >> color.z;
+        std::cout << "B%: "; color.z = doubleUserInput();
         valid = (color.z <= 100 && color.z >= 0) ? true : false;
         
         if(!valid){std::cout << "Percentages must be in range 0 to 100 inclusive. Try again" << std::endl;}
@@ -298,4 +301,18 @@ bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int cou
     }
   }
   return validity;
+}
+
+double doubleUserInput(){
+  double input = 0;
+  while(true){
+    if(std::cin >> input){break;}
+    else{
+      std::cout << "Invalid input, try again" << std::endl;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+  }
+
+  return input;
 }
