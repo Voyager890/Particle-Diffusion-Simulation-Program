@@ -75,19 +75,19 @@ void defaultInit(class_particleInitHelper*& particleInitHelper, int& count_parti
     particleInitHelper = new class_particleInitHelper(count_particleTypes);
     if(particleInitHelper == nullptr){std::cout << "ProgramInitHelper failed to instantiate in defaultInit\n";}
 
-    particleInitHelper->name[0] = "Defualt Red";
+    particleInitHelper->name[0] = "Defualt_Red";
     particleInitHelper->mass[0] = 1.0f;
     particleInitHelper->radius[0] = 0.2f;
     particleInitHelper->color[0] = glm::vec3(0.6f, 0.2f, 0.0f);
     particleInitHelper->particleCount[0] = 5;
     
-    particleInitHelper->name[1] = "Defualt Blue";
+    particleInitHelper->name[1] = "Defualt_Blue";
     particleInitHelper->mass[1] = 1.0f;
     particleInitHelper->radius[1] = 0.2f;
     particleInitHelper->color[1] = glm::vec3(0.0f, 0.2f, 0.6f);
     particleInitHelper->particleCount[1] = 5;
     
-    particleInitHelper->name[2] = "Defualt Green";
+    particleInitHelper->name[2] = "Defualt_Green";
     particleInitHelper->mass[2] = 1.0f;
     particleInitHelper->radius[2] = 0.2f;
     particleInitHelper->color[2] = glm::vec3(0.1f, 0.6f, 0.1f);

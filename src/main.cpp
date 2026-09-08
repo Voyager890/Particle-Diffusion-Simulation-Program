@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <fstream>
 #include <glm/common.hpp>
 #include <iostream>
 
@@ -244,6 +245,22 @@ int main(){
     std::cout << std::endl;
     }
     std::cout << "END"<< std::endl;
+  
+    // Store resultant data in resultantData.txt
+    std::ofstream resultsFile("../resultantData.txt");
+    if(!resultsFile.is_open()){std::cout << std::endl << "ERROR : FAILED TO OPEN RESULTANT FILE, SKIPPING RESULTS STORAGE" << std::endl;}
+    else{
+      for(int i = 0; i < particleTypesAmount; i++ ){
+        resultsFile << particleTypePointer[i]->particleName << ',';
+        for(int j = 0; j < (int)outputData[i].size(); j++){
+          resultsFile << outputData[i][j] << ',';
+        }
+        resultsFile << '\n';
+      }  
+      resultsFile.close();
+    }
+    
+
 
     delete [] particleTypePointer;
 
