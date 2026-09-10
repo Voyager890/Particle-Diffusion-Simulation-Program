@@ -4,8 +4,8 @@ add_library(proceduralGeometry STATIC
 )
 
 target_include_directories(proceduralGeometry PRIVATE
-    ${CMAKE_SOURCE_DIR}/libs
-    ${CMAKE_SOURCE_DIR}/external
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../external
 )
 target_link_libraries(proceduralGeometry PRIVATE
     glm

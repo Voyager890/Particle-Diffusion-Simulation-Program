@@ -261,9 +261,13 @@ int main(){
     }
     
 
-
+    for(int i = 0; i < particleTypesAmount; i++){
+        delete particleTypePointer[i];
+    }
     delete [] particleTypePointer;
+    particleTypePointer = nullptr;
 
+    delete particleInitHelper;
     glfwTerminate();
     return 0;
 }

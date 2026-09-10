@@ -1,0 +1,20 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glad/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glfw/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glfw/src/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glfw/docs/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glm/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/external/glm/glm/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/class_bufferObjectsInitHelper/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/class_particles/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/proceduralGeometry/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/class_particleInitHelper/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/debug_tools/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/func_programStartMenu/cmake_install.cmake",
+		"/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/build-win/libs/func_physicsEngine/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
