@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
 
+#include "shaders/class.hpp"
+
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
@@ -26,8 +28,7 @@
 #include <vector>
 
 // Custom Libraries
-#include "proceduralGeometry/proceduralGeometry.h"
-#include "shaders/class.hpp"
+#include "func_proceduralGeometry/proceduralGeometry.h"
 #include "class_bufferObjectsInitHelper/bufferObjectsInitHelper.h"
 #include "class_particles/particles.h"
 #include "class_particleInitHelper/particleInitHelper.h"
@@ -195,7 +196,9 @@ int main(){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Physics
-      physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); // ISSUE
+      physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); 
+
+      // Harvest resultantData
       if(glfwGetTime() > nextCollectionTime){
         
         for(int i = 0; i < particleTypesAmount; i++){

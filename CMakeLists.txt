@@ -11,7 +11,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glm)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/class_bufferObjectsInitHelper)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/class_particles)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/proceduralGeometry)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/func_proceduralGeometry)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/class_particleInitHelper)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/debug_tools)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/func_programStartMenu)

@@ -1,4 +1,4 @@
-*CURRENTLY NOT INTENDED TO BE RUN ON OTHER MACHINES*
+*CURRENTLY ONLY INTENDED TO RUN ON WINDOWS AND LINUX MACHINES
 The program can be initialized and launched in the 3 ways listed below:
 
 1. Launch the program and then enter 0 at the first option and then a non-zero and below particle count value to interactively input all parameters.
@@ -31,4 +31,36 @@ Hydrogen,0,1,0,1,0.1,1;
 Oxygen, 0.7,1,0.7,16,0.5,2;
 ---------------------------------------------------------------------------------------------------
 
-To close the program press the escape ("esc") key.
+To close the program during the simulation press the escape ("esc") key.
+
+After running the program and closing the application, some "resultant data" are output. 
+The first column shows the names of particles types. The column after that each indicate the 
+total number of collisions among all particles of that type, within the time period of 
+"dataHarvestTimeInterval", which is a variable thats default value is 5. This value can 
+be changed by modifying the value assigned to the "dataHarvestTimeInterval" constant 
+and recompilling the program.
+
+The longer the program goes for, the more columns would be added. As more "dataHarvests" occur.
+
+Here is an example of a output with explanation.
+
+Carbon : 0,0,8,
+Hydrogen, : 0,1,0,
+Oxygen : 0,5,7,
+
+The first column shows the names of data types present during the simulation. Carbon, Hydrogen 
+and Oxygen. After that, during the first time interval no particle of any data type collided. 
+This will usually be the case since the first data harvest occurs as soon as the simulation starts. 
+
+The third row shows the second time interval. Where no particles belonging to the Carbon particle type 
+collide. 1 collision occurred with a particle that is of Hydrogen particle type. There were 5 collisions
+among particles of the oxygen particle type.
+
+the last row shows that 8 collisions occurred for carbon particles within the third/last time 
+interval. No hydrogen particles collided in the last time interval. 7 collisions happened between 
+oxygen particles.
+
+The resultant data is also stored in the "resultantData.txt" file in csv format. This file is overwritten 
+every run.
+
+Please report any issues, confusions or suggestions by opening a issue on the github page or directly emailing me.

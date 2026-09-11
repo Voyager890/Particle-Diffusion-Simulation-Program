@@ -62,19 +62,31 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
 
 void removeOverlap(class_particleType**& particleTypePointer, const size_t countParticleType, const double borderDisplacement){
 
-    std::random_device rd;
-    std::uniform_real_distribution<float>dist(-1.0,1.0);
+  std::random_device urmum;
+  std::uniform_real_distribution<float>dist(-1.0,1.0);
 
-    for(int typeN = 0; typeN < countParticleType; typeN++){
-        const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
-        for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
-            while(isOverlapping(particleTypePointer, countParticleType, typeN, particleN)){
-                particleTypePointer[typeN]->particle[particleN].position = glm::vec3(dist(rd), dist(rd), dist(rd));
-                particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
-            }
-            
+  for(int typeN = 0; typeN < countParticleType; typeN++){
+    const float maxDisplacementInBound = borderDisplacement - particleTypePointer[typeN]->particleRadius;
+    for(int particleN = 0; particleN < particleTypePointer[typeN]->particleCount; particleN++){
+
+      const size_t attemptsLimit = 500000;
+      size_t attempt = 0;
+      while(isOverlapping(particleTypePointer, countParticleType, typeN, particleN)){
+        particleTypePointer[typeN]->particle[particleN].position = glm::vec3(dist(urmum), dist(urmum), dist(urmum));
+        particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
+
+        attempt++;
+        if(attempt >= attemptsLimit){
+          std::cout << std::endl << "TOO MANY ATTEMPTS TO REMOVE OVERLAP "
+                                  << ":: SUSPECTS INFINITE LOOP "
+                                  << ":: PROCCEDING WITHOUT REMOVING OVERLAP OF "
+                                  << "PARTICLE TYPE: " << typeN << " PARTICLE ID: " << particleN << std::endl;
+          break;
         }
+      }
+      
     }
+  }
 }
 
 bool isOverlapping(class_particleType**& particleTypePointer,const size_t countParticleType, const size_t targetType, const size_t targetParticle){
