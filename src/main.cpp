@@ -110,7 +110,7 @@ int main(){
     cameraInit = glm::translate(cameraInit, startingCameraDistance);
     glm::mat4 positionMatrix = glm::mat4(1.0f);
 
-    Shader shader_standarad(SHADER_PATH"/vertex.glsl", SHADER_PATH"/fragment.glsl");    
+    Shader shader_standarad(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);    
     shader_standarad.use();
     shader_standarad.setMat4("motion", positionMatrix);
     shader_standarad.setMat4("camera", cameraInit);
@@ -120,7 +120,7 @@ int main(){
     shader_standarad.setVec3("lightColor", lightColor);
     shader_standarad.setVec3("lightPos", lightSourceOrigin);
     
-    Shader shader_lightSource(SHADER_PATH"/lightSourceVertex.glsl",SHADER_PATH"/lightSourceFragment.glsl");
+    Shader shader_lightSource(LIGHT_SOURCE_VERTEX_SHADER_PATH, LIGHT_SOURCE_FRAGMENT_SHADER_PATH);
     shader_lightSource.use();
     glm::mat4 lightSourceMotion(1.0f);
     lightSourceMotion = glm::translate(lightSourceMotion, lightSourceOrigin);
