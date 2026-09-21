@@ -19,13 +19,13 @@ At the end of describing the properties of a particle, end the line with a ';' c
 (ParticleTypeName),(ParticlesColorRedValue),(ParticlesColorGreenValue),(ParticlesColorBlueValue),(ParticlesMass),(ParticleRadius),(NumberOfParticles);
 (ParticleTypeName2),(ParticlesColorRedValue2),(ParticlesColorGreenValue2),(ParticlesColorBlueValue2),(ParticlesMass2),(ParticleRadius2),(NumberOfParticles2);
 //so on...
----------------------------------------------------------------------------------------------------Below is an example within the '-' borders. It describes configuring 3 particle types. With a simulation border area of 27 (thus the sides of the cube are 3 units).
+---------------------------------------------------------------------------------------------------Below is an example within the '-' borders. It describes configuring 3 particle types. With a simulation border area of 81 (thus the sides of the cube are 9 units).
 First has the particle type name Carbon and it has rgb color values 0,0,0 (black), has 12 mass, has a radius of 1, and there exists 2 of it.
 Then is the particle type is called Hydrogen and it has rgb color values of 0,0,1 (blue), has 1 mass, has a radius of 0.1 and there exists 10 particles of this.
 Lastly is the particle type name Oxygen which is colored a light blue with rgb values 0.7,1,0.7, has mass 16, has radius of 0.5, and there exists 2 of it.
 ---------------------------------------------------------------------------------------------------
 3
-27
+81
 Carbon,0,0,0,12,1,2;
 Hydrogen,0,1,0,1,0.1,1;
 Oxygen, 0.7,1,0.7,16,0.5,2;
