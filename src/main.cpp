@@ -10,9 +10,10 @@
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
-#include <glm/common.hpp>
 #include <iostream>
+#include <filesystem>
 
+#include <glm/common.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -109,8 +110,20 @@ int main(){
     startingCameraDistance += startingCameraOffset; 
     cameraInit = glm::translate(cameraInit, startingCameraDistance);
     glm::mat4 positionMatrix = glm::mat4(1.0f);
+    
+    std::filesystem::path vertex_shader_path = "../src/shaders/vertex.glsl";
+    std::filesystem::path fragment_shader_path = "../src/shaders/fragment.glsl";
+    
+    vertex_shader_path =   std::filesystem::absolute(vertex_shader_path);
+    fragment_shader_path = std::filesystem::absolute(fragment_shader_path);
+    
+    if(!std::filesystem::exists(vertex_shader_path)){std::cout << "particles' vertex shader path invalid" << std::endl;return -1;}
+    if(!std::filesystem::exists(fragment_shader_path)){std::cout << "particles' fragment shader path invalid" << std::endl;return -1;}
 
-    Shader shader_standarad(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);    
+    const std::string portable_vertex_shader_path = vertex_shader_path.string();
+    const std::string portable_fragment_shader_path = fragment_shader_path.string();
+
+    Shader shader_standarad(portable_vertex_shader_path.c_str(), portable_fragment_shader_path.c_str());
     shader_standarad.use();
     shader_standarad.setMat4("motion", positionMatrix);
     shader_standarad.setMat4("camera", cameraInit);
@@ -120,7 +133,19 @@ int main(){
     shader_standarad.setVec3("lightColor", lightColor);
     shader_standarad.setVec3("lightPos", lightSourceOrigin);
     
-    Shader shader_lightSource(LIGHT_SOURCE_VERTEX_SHADER_PATH, LIGHT_SOURCE_FRAGMENT_SHADER_PATH);
+    std::filesystem::path light_source_vertex_shader_path = "../src/shaders/lightSourceVertex.glsl";
+    std::filesystem::path light_source_fragment_shader_path = "../src/shaders/lightSourceFragment.glsl";
+
+    light_source_vertex_shader_path = std::filesystem::absolute(light_source_vertex_shader_path);
+    light_source_fragment_shader_path = std::filesystem::absolute(light_source_fragment_shader_path);
+  
+    if(!std::filesystem::exists(light_source_vertex_shader_path)){std::cout << "light sources's vertex shader path invalid" << std::endl;return -1;}
+    if(!std::filesystem::exists(light_source_fragment_shader_path)){std::cout << "light sources's fragment shader path invalid" << std::endl;return -1;}
+
+    const std::string portable_light_source_vertex_shader_path = light_source_vertex_shader_path.string();
+    const std::string portable_light_source_fragment_shader_path = light_source_fragment_shader_path.string();
+
+    Shader shader_lightSource(portable_light_source_vertex_shader_path.c_str(), portable_light_source_fragment_shader_path.c_str());
     shader_lightSource.use();
     glm::mat4 lightSourceMotion(1.0f);
     lightSourceMotion = glm::translate(lightSourceMotion, lightSourceOrigin);
@@ -306,5 +331,4 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
 }
-
 

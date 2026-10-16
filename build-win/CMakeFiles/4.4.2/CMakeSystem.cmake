@@ -1,6 +1,6 @@
-set(CMAKE_HOST_SYSTEM "Linux-6.18.41-1-lts")
+set(CMAKE_HOST_SYSTEM "Linux-7.1.5-arch1-2")
 set(CMAKE_HOST_SYSTEM_NAME "Linux")
-set(CMAKE_HOST_SYSTEM_VERSION "6.18.41-1-lts")
+set(CMAKE_HOST_SYSTEM_VERSION "7.1.5-arch1-2")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
 include("/home/shaabin/Documents/projects/vscode/c_cpp/openGL/particleDiffusion_SimulationGL.cpp/mingw-w64.cmake")
