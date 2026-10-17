@@ -1,40 +1,10 @@
-Currently the vertex buffer object data generator calculates the x and y coordinate of each vertex every layer.
-Instead the vertices of one ring can be calculated and assigned onto the rest of the layers. After that, the vertex
-data in each layer can be multiplied with the radius scaler (obtained by pitch trig calc) corresponding to that layer.
-This would help with program start time especially if many verticesPerRing or particle types are used.(LOW)
-
-Since currently the only valid verticesPerRing input are powers of 2. There will be a even number of vertices
-per ring. Since the algorytm calculates spacing between vertices by diving 2 pi radians by vertices per ring, 
-there will be a duplicate set of absaloute values per vertex. So instead of calculating every vertex. The algorythm
-could calculate just half the vertices with the trigomenetric functions. And mirror this half by flipping the 
-sign of the values. This would slightly improve program start time especially if many verticesPerRings were
-input or particle types are used. Howver I do not believe this performance boost is worth the loss of the current 
-algorithms readablity.  (LOW)
-
-Currently the ebo generation functions work differently even though they can be refactored to all be a 
-similar algorythm. This would help with readablity.(MEDIUM)
-
-Currently the bufferObjects generation functions use unsigned ints or floats. This will cause problems if
-there is a very large number of vertices per ring count. Even though the graphical fidelity of the spheres
-would not change past a certain value of vertices per ring, The allowance of a value so large is a problem.
-calculate a reasonable threshold and validate inputs. Also use unsigned long long/double types in the functions.(MEDIUM)
-
-Currently the border collision handler seems to loop around a set circuit if uninterrupted.(MEDIUM)
-
-Current particle collision detection system is very expensive. It loops through ever member particle
-and then compares it with every other member particle in another loop. Heavily increased overhead and
-runtime offset.(MEDIUM)
-
-collision detection systems use expensive root functions. Minimize them.(MEDIUM)
-
 If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
 in the physics engine in a enldess loop.(MEDIUM)
 
-When border area becomes too large. The projection "backwall" is infront of the simulation zone. To fix this, will have to dynamically allocated backwall, similar to camera starting pos (HIGH)
-
+When border area becomes too large. The projection matrices "backwall" is infront of the simulation zone. To fix this, will have to dynamically allocated backwall, similar to camera starting pos (HIGH)
 
 When a input value becomes too large. it is takes as a negative value, must implement upper bound for suitable data type.(HIGH)
 
-When the initial particle speed is too high and border area too low. then the physics engines border collisions handler enters a infintie loop. Either calculate a the ratio where this happens or introduce a "watchdog" where if the main loop doesnt loop within a expected interva, then it is assumed it has entered a infintie loop and exits the program with the appropriate error messege and handling advice. (HIGH)
+When the initial particle speed is too high and border area too low. then the physics engines border collisions handler enters a infinite loop. Either calculate the ratio where this happens or introduce a "watchdog" where if the main loop doesnt loop within a expected interval, then it is assumed it has entered a infinite loop and exits the program with the appropriate error messege and handling advice. (HIGH)
 
 
