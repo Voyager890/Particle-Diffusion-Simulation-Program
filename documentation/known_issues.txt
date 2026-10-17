@@ -30,12 +30,6 @@ collision detection systems use expensive root functions. Minimize them.(MEDIUM)
 If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
 in the physics engine in a enldess loop.(MEDIUM)
 
-The programs speed depends on the end computers power. So powerful computers cause the simulation 
-to occur very fast. Controls also become sensitive as the processor power of the computer increase.
-This is very unpleasent and unpredictable (HIGH).
-
-Default camera settings/positions reset buttong (HIGH)
-
 When border area becomes too large. The projection "backwall" is infront of the simulation zone. To fix this, will have to dynamically allocated backwall, similar to camera starting pos (HIGH)
 
 

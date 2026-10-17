@@ -9,5 +9,7 @@ OPTION | KEY(S)
 
 QUIT : Esc
 
-Rotation Controls: W,A,S,D,E,Q
-Translation Controls: I,K,L,J,O,U
+Rotation Controls : W,A,S,D,E,Q
+Translation Controls : I,K,L,J,O,U
+
+Reset Camera View : R
