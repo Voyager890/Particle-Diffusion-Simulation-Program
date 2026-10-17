@@ -34,4 +34,13 @@ The programs speed depends on the end computers power. So powerful computers cau
 to occur very fast. Controls also become sensitive as the processor power of the computer increase.
 This is very unpleasent and unpredictable (HIGH).
 
-Allow to change the speed of particles and a reset button to the camera. Also provide instructions for the camera controls.
+Default camera settings/positions reset buttong (HIGH)
+
+When border area becomes too large. The projection "backwall" is infront of the simulation zone. To fix this, will have to dynamically allocated backwall, similar to camera starting pos (HIGH)
+
+
+When a input value becomes too large. it is takes as a negative value, must implement upper bound for suitable data type.(HIGH)
+
+When the initial particle speed is too high and border area too low. then the physics engines border collisions handler enters a infintie loop. Either calculate a the ratio where this happens or introduce a "watchdog" where if the main loop doesnt loop within a expected interva, then it is assumed it has entered a infintie loop and exits the program with the appropriate error messege and handling advice. (HIGH)
+
+

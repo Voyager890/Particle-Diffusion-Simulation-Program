@@ -41,8 +41,9 @@
 int wWidth = 1280;
 int wHeight = 720;
 
-void inputCheck(GLFWwindow* window, glm::mat4& matrix);
+void inputCheck(GLFWwindow* window, glm::mat4& matrix, const float borderArea);
 void resize_callback(GLFWwindow* window,int width, int height);
+glm::mat4 defaultCameraSet(const float borderArea);
 
 int main(){
     // Initialize the required parameters
@@ -97,18 +98,14 @@ int main(){
         if(particleTypePointer[i] == nullptr){std::cout << i << " Particle type pointer is a nullptr\n";}
     }
 
-    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, 0.01);
+    initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, particleInitHelper->speed);
 
     // Shaders Initialization
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
+
     glm::mat4 cameraInit = glm::mat4(1.0f);
+    cameraInit = defaultCameraSet(borderArea);
 
-    glm::vec3 startingCameraDistance(0.0f, 0.0f, -6.0f);
-    const double halfBorderLength = std::sqrt(borderArea) / 2.0;
-    const glm::vec3 startingCameraOffset(0.0f, 0.0f, -halfBorderLength);
-
-    startingCameraDistance += startingCameraOffset; 
-    cameraInit = glm::translate(cameraInit, startingCameraDistance);
     glm::mat4 positionMatrix = glm::mat4(1.0f);
     
     std::filesystem::path vertex_shader_path = "../src/shaders/vertex.glsl";
@@ -215,9 +212,9 @@ int main(){
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
-      inputCheck(window, cameraInit);
+      inputCheck(window, cameraInit, borderArea);
       
-      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      glClearColor(0.0f, 0.05f, 0.05f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Physics
@@ -306,7 +303,7 @@ void resize_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, wWidth, wHeight);
 }
 
-void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
+void inputCheck(GLFWwindow *window, glm::mat4 &matrix, const float borderArea){
     const float rotationSensitivity = 1.0f;
     const float translationSensitivity = 0.1f;
 
@@ -330,5 +327,22 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix){
     if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(-translationSensitivity, 0.0f, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
+
+    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){matrix = defaultCameraSet(borderArea);};
 }
 
+glm::mat4 defaultCameraSet(const float borderArea){
+  glm::mat4 camera_orientation = glm::mat4(1.0f);
+
+  const float distance_between_camera_border = 6.0f;
+  glm::vec3 initial_camera_distance(0.0f, 0.0f, (-1.0f * distance_between_camera_border));
+
+  const double half_border_length = std::sqrt(borderArea) / 2.0f;
+  const glm::vec3 initial_camera_offset(0.0f, 0.0f, -half_border_length);
+
+  initial_camera_distance += initial_camera_offset;
+
+  camera_orientation = glm::translate(camera_orientation, initial_camera_distance);
+
+  return camera_orientation;
+}

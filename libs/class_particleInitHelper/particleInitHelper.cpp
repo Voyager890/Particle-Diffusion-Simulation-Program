@@ -5,10 +5,11 @@
 
 class_particleInitHelper::class_particleInitHelper(int& count_particleTypes)
 {
-    name   = new std::string[count_particleTypes];
-    color  = new glm::vec3[count_particleTypes];
-    mass   = new float[count_particleTypes];
-    radius = new float[count_particleTypes];
+    name     = new std::string[count_particleTypes];
+    color    = new glm::vec3[count_particleTypes];
+    mass     = new float[count_particleTypes];
+    radius   = new float[count_particleTypes];
+    speed = new float[count_particleTypes];
     particleCount = new float[count_particleTypes];
 }
 
@@ -17,6 +18,7 @@ class_particleInitHelper::~class_particleInitHelper(){
     delete [] color;
     delete [] mass;
     delete [] radius;
+    delete [] speed;
     delete [] particleCount;
 }
 

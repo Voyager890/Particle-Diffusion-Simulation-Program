@@ -78,18 +78,21 @@ void defaultInit(class_particleInitHelper*& particleInitHelper, int& count_parti
     particleInitHelper->name[0] = "Defualt_Red";
     particleInitHelper->mass[0] = 1.0f;
     particleInitHelper->radius[0] = 0.2f;
+    particleInitHelper->speed[0] = 0.01f;
     particleInitHelper->color[0] = glm::vec3(0.6f, 0.2f, 0.0f);
     particleInitHelper->particleCount[0] = 5;
     
     particleInitHelper->name[1] = "Defualt_Blue";
     particleInitHelper->mass[1] = 1.0f;
     particleInitHelper->radius[1] = 0.2f;
+    particleInitHelper->speed[1] = 0.01f;
     particleInitHelper->color[1] = glm::vec3(0.0f, 0.2f, 0.6f);
     particleInitHelper->particleCount[1] = 5;
     
     particleInitHelper->name[2] = "Defualt_Green";
     particleInitHelper->mass[2] = 1.0f;
     particleInitHelper->radius[2] = 0.2f;
+    particleInitHelper->speed[2] = 0.01f;
     particleInitHelper->color[2] = glm::vec3(0.1f, 0.6f, 0.1f);
     particleInitHelper->particleCount[2] = 5;
 }
@@ -119,6 +122,9 @@ void manualInit (class_particleInitHelper*& particleInitHelper, int& count_parti
 
     std::cout << "Enter the radius of particle type " << i + 1 << std::endl;
     particleInitHelper->radius[i] = doubleUserInput();
+
+    std::cout << "Enter the initial speed of the particle type" << i + 1 << std::endl;
+    particleInitHelper->speed[i] = doubleUserInput();
 
     std::cout << "Enter the number of particle belonging to the particle type " << i + 1 << std::endl;
      particleInitHelper->particleCount[i] = doubleUserInput();
@@ -200,6 +206,8 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
     if(errorFlag != 0){break;}
     particleInitHelper->radius[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
+    particleInitHelper->speed[i] = std::stof(extractString(configFile, currentElement, errorFlag));
+    if(errorFlag != 0){break;}
     particleInitHelper->particleCount[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
 
@@ -224,7 +232,7 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
 }
 
 std::string extractString(std::ifstream& file, int& currentElement, int& errorFlag){
-  const size_t totalNumberOfElements = 7;
+  const size_t totalNumberOfElements = 8;
 
   char charInputBuffer;
   std::string strInputBuffer;
@@ -278,6 +286,11 @@ bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int cou
 
     if(particleInitHelper->radius[i] <= 0){
       std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = RADIUS MUST BE GREATER THAN ZERO" << std::endl;
+      validity = false;
+    }
+
+    if(particleInitHelper->speed[i] <= 0){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = SPEED MUST BE GREATER THAN ZERO" << std::endl;
       validity = false;
     }
 

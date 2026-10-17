@@ -12,6 +12,7 @@ public:
     std::string* name;
     float* mass;
     float* radius;
+    float* speed;
     float* particleCount;
     glm::vec3* color;
 };

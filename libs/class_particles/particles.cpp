@@ -28,7 +28,7 @@ class_particleType::~class_particleType(){
     delete [] particle;
 }
 
-void initParticleProperties(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea, const float speed){
+void initParticleProperties(class_particleType**& particleTypePointer, const size_t countParticleType, const float borderArea, const float* speed){
   const double borderDisplacement = std::cbrt(borderArea) / 2;
 
   std::random_device rd;
@@ -41,7 +41,7 @@ void initParticleProperties(class_particleType**& particleTypePointer, const siz
           particleTypePointer[typeN]->particle[particleN].position *= maxDisplacementInBound;
 
           particleTypePointer[typeN]->particle[particleN].velocity = glm::vec3(dist(rd), dist(rd), dist(rd));
-          particleTypePointer[typeN]->particle[particleN].velocity *= speed;
+          particleTypePointer[typeN]->particle[particleN].velocity *= speed[typeN];
 
       }
   }
