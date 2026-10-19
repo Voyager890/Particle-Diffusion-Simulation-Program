@@ -304,8 +304,12 @@ void resize_callback(GLFWwindow* window, int width, int height){
 }
 
 void inputCheck(GLFWwindow *window, glm::mat4 &matrix, const float borderArea){
-    const float rotationSensitivity = 1.0f;
-    const float translationSensitivity = 0.1f;
+
+    const float default_rotation_sensitivity = 0.1f;
+    const float default_translation_sensitivity = 0.1f;
+
+    static float rotationSensitivity    = default_rotation_sensitivity;
+    static float translationSensitivity = default_translation_sensitivity;
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
@@ -327,8 +331,31 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix, const float borderArea){
     if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(-translationSensitivity, 0.0f, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
+    
+    // Camera sensitvity
+    const float rotation_sensitivity_change_rate = 0.005;
+  
+    const float rotation_sensitivity_limit = 100;
+    const float translation_sensitivity_limit = 100;
 
-    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){matrix = defaultCameraSet(borderArea);};
+    if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){rotationSensitivity    += rotation_sensitivity_change_rate;}
+    if(glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){rotationSensitivity    -= rotation_sensitivity_change_rate;}
+    if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){translationSensitivity += rotation_sensitivity_change_rate;}
+    if(glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){translationSensitivity -= rotation_sensitivity_change_rate;}
+
+    if(rotationSensitivity >= rotation_sensitivity_limit){rotationSensitivity = rotation_sensitivity_limit;}
+    if(rotationSensitivity <= 0){rotationSensitivity = 0;}
+
+    if(translationSensitivity >= translation_sensitivity_limit){translationSensitivity = translation_sensitivity_limit;}
+    if(translationSensitivity <= 0){translationSensitivity = 0;}
+
+    if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+      matrix = defaultCameraSet(borderArea);
+      rotationSensitivity = default_rotation_sensitivity;
+      translationSensitivity = default_translation_sensitivity;
+
+    };
+
 }
 
 glm::mat4 defaultCameraSet(const float borderArea){
