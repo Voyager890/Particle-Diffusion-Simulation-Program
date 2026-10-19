@@ -1,35 +1,36 @@
 *CURRENTLY ONLY INTENDED TO RUN ON WINDOWS AND LINUX MACHINES
 The program can be initialized and launched in the 3 ways listed below:
 
-1. Launch the program and then enter 0 at the first option and then a non-zero and below particle count value to interactively input all parameters.
+1. Launch the program and then enter 1 to instantly enter the default values. Good for testing if the program by the least runs.
 
-2. Launch the program and then enter 0 at the first option and then 0 to start the simulation with the default parameters.
+2. Launch the program and then enter 2 to interactively enter settings for all the particle types. This can be rather tedious for larger amounts of particle types.
 
-3. Create or edit a file named "simulationConfigs.txt" (The name is case sensitive) in the root directory.
+3. Create or edit the file named "simulationConfigs.txt" (The name is case sensitive) in the root directory.
+
 Write desired options. The files format is provided within the "-" borders below.
 Replace contents inside parentheses with described contents and remove parentheses.
 text after "//" are comments giving additional information, do not include them in the actual file. Do not write in bare decimal point eg (.8, .1, .45).
 Write the leading zero before the decimal point eg:(0.8, 0.1, 0.45).
 Leave no empty space in each line. Names with spaces in them are not supported.
-All seven properties of a particle must be described here
+All eight properties of a particle must be described here
 At the end of describing the properties of a particle, end the line with a ';' character.
 ---------------------------------------------------------------------------------------------------
 (NumberOfParticleTypes)
 (SimulationBorderArea)
-(ParticleTypeName),(ParticlesColorRedValue),(ParticlesColorGreenValue),(ParticlesColorBlueValue),(ParticlesMass),(ParticleRadius),(ParticleInitialSpeed),(NumberOfParticles);
-(ParticleTypeName2),(ParticlesColorRedValue2),(ParticlesColorGreenValue2),(ParticlesColorBlueValue2),(ParticlesMass2),(ParticleRadius2),(ParticleInitialSpeed2),(NumberOfParticles2);
+(ParticleTypeName),(ParticlesColorRedPercentage),(ParticlesColorGreenPercentage),(ParticlesColorBluePercentage),(ParticlesMass),(ParticleRadius),(ParticleInitialSpeed),(NumberOfParticles);
+(ParticleTypeName2),(ParticlesColorRedPercentage2),(ParticlesColorGreenPercentage2),(ParticlesColorBluePercentage2),(ParticlesMass2),(ParticleRadius2),(ParticleInitialSpeed2),(NumberOfParticles2);
 //so on...
 ---------------------------------------------------------------------------------------------------
 Below is an example within the '-' borders. It describes configuring 3 particle types. With a simulation border area of 81 (thus the sides of the cube are 9 units).
 First has the particle type name Carbon and it has rgb color values 0,0,0 (black), has 12 mass, has a radius of 1, has a initial speed of 1 and there exists 2 of it.
-Then is the particle type is called Hydrogen and it has rgb color values of 0,0,1 (blue), has 1 mass, has a radius of 0.1, initial speed 2 and there exists 10 particles of this.
-Lastly is the particle type name Oxygen which is colored a light blue with rgb values 0.7,1,0.7, has mass 16, has radius of 0.5, initial speed 1.3 and there exists 2 of it.
+Then is the particle type is called Hydrogen and it has rgb color values of 0,0,100 (blue), has 1 mass, has a radius of 0.1, initial speed 2 and there exists 10 particles of this.
+Lastly is the particle type name Oxygen which is colored a light blue with rgb values 70,100,70, has mass 16, has radius of 0.5, initial speed 1.3 and there exists 2 of it.
 ---------------------------------------------------------------------------------------------------
 3
 81
 Carbon,0,0,0,12,1,1,2;
-Hydrogen,0,1,0,1,0.1,2,1;
-Oxygen, 0.7,1,0.7,16,0.5,1.3,2;
+Hydrogen,0,100,0,1,0.1,2,1;
+Oxygen, 70,100,70,16,0.5,1.3,2;
 ---------------------------------------------------------------------------------------------------
 
 To close the program during the simulation press the escape ("esc") key.

@@ -12,11 +12,11 @@ QUIT : Esc
 Rotation Controls : W,A,S,D,E,Q
 Translation Controls : I,K,L,J,O,U
 
-Increase Camera rotation speed : C
-Decrease Camera rotation speed : V
-Increase Camera Translation speed : B
-Decrease Camera Translation speed : N
+Increase Box rotation speed : C
+Decrease Box rotation speed : V
+Increase Box Translation speed : B
+Decrease Box Translation speed : N
 (NOTE: The speeds are capped to a limit)
 
-Reset Camera Settings : R
+Reset Box view Settings : R
 

@@ -144,7 +144,7 @@ void rgbInput(glm::vec3& color){
         std::cout << "B%: "; color.z = doubleUserInput();
         valid = (color.z <= 100 && color.z >= 0) ? true : false;
         
-        if(!valid){std::cout << "Percentages must be in range 0 to 100 inclusive. Try again" << std::endl;}
+        if(!valid){std::cout << "Percentages must be in the range 0 to 100 inclusive.Try again" << std::endl;}
     }while(!valid);
 
     color *= 0.01;
@@ -166,7 +166,7 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
   }
   catch(std::invalid_argument& e){
     std::cout << "Caught exception : " << e.what() << std::endl;
-    std::cout << "This means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
+    std::cout << "This probably means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
     return;
   }
 
@@ -179,7 +179,7 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
   }
   catch(std::invalid_argument& e){
     std::cout << "Caught exception : " << e.what() << std::endl;
-    std::cout << "This means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
+    std::cout << "This probably means the function read a empty space instead of the required data. Ensure there are no empty lines/spaces" << std::endl;
     return;
   }
 
@@ -201,6 +201,8 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
     if(errorFlag != 0){break;}
     particleInitHelper->color[i][2] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
+
+    particleInitHelper->color[i] *= 0.01; // Convert to measurment used in program
 
     particleInitHelper->mass[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
@@ -277,7 +279,27 @@ bool areOptionsValid(class_particleInitHelper* particleInitHelper, const int cou
     validity = false;
   }
 
+  const float border_area_limit = 1000000;
+  if(borderArea >= border_area_limit){
+    std::cout << "ERROR: borderArea CANNOT EXCEED 999,999\n";
+    validity = false;
+  }
+
   for(int i = 0; i < count_particleTypes; i++){
+
+    // The values are normalized before validation, thus range is 0 - 1 in code.
+    if(particleInitHelper->color[i].x < 0 || particleInitHelper->color[i].x > 1){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = RGB COLOUR VALUE MUST BE WITHIN THE RANGE 0 TO 100 INCLUSIVE" << std::endl;
+      validity = false;
+    }
+    if(particleInitHelper->color[i].y < 0 || particleInitHelper->color[i].y > 1){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = RGB COLOUR VALUE MUST BE WITHIN THE RANGE 0 TO 100 INCLUSIVE" << std::endl;
+      validity = false;
+    }
+    if(particleInitHelper->color[i].z < 0 || particleInitHelper->color[i].z > 1){
+      std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = RGB COLOUR VALUE MUST BE WITHIN THE RANGE 0 TO 100 INCLUSIVE" << std::endl;
+      validity = false;
+    }
 
     if(particleInitHelper->mass[i] <= 0){
       std::cout << "ERROR WITH PARTICLE " << i + 1 << " / Particle Name: " << *particleInitHelper->name << " = MASS MUST BE GREATER THAN ZERO" << std::endl;

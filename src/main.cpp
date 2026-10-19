@@ -101,7 +101,7 @@ int main(){
     initParticleProperties(particleTypePointer, particleTypesAmount, borderArea, particleInitHelper->speed);
 
     // Shaders Initialization
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, 100.0f);
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)wWidth/(float)wHeight, 0.1f, (100.0f + 15 * std::cbrt(borderArea)));
 
     glm::mat4 cameraInit = glm::mat4(1.0f);
     cameraInit = defaultCameraSet(borderArea);
@@ -305,8 +305,8 @@ void resize_callback(GLFWwindow* window, int width, int height){
 
 void inputCheck(GLFWwindow *window, glm::mat4 &matrix, const float borderArea){
 
-    const float default_rotation_sensitivity = 0.1f;
-    const float default_translation_sensitivity = 0.1f;
+    const float default_rotation_sensitivity = 0.05f;
+    const float default_translation_sensitivity = 0.05f;
 
     static float rotationSensitivity    = default_rotation_sensitivity;
     static float translationSensitivity = default_translation_sensitivity;
@@ -332,7 +332,7 @@ void inputCheck(GLFWwindow *window, glm::mat4 &matrix, const float borderArea){
     if(glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, translationSensitivity, 0.0f));};
     if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){matrix = glm::translate(matrix, glm::vec3(0.0f, -translationSensitivity, 0.0f));};
     
-    // Camera sensitvity
+    // Box control sensitvity
     const float rotation_sensitivity_change_rate = 0.005;
   
     const float rotation_sensitivity_limit = 100;

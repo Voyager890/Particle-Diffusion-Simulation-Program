@@ -1,7 +1,4 @@
-If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions
-in the physics engine in a enldess loop.(MEDIUM)
-
-When border area becomes too large. The projection matrices "backwall" is infront of the simulation zone. To fix this, will have to dynamically allocated backwall, similar to camera starting pos (HIGH)
+If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions in the physics engine in a enldess loop.(MEDIUM)
 
 When a input value becomes too large. it is takes as a negative value, must implement upper bound for suitable data type.(HIGH)
 
