@@ -1,6 +1,6 @@
-If a particle spawns outside the borderm It cannot get back in, constantly triggering border collisions in the physics engine in a infinite loop.
+If a particle spawns outside the border It cannot get back in, constantly triggering border collisions in the physics engine in a infinite loop.
 
-When a input value becomes too large, the variable overflows and takes it as a negative value.
+When a input value becomes too large, the variable overflows and takes it as a negative value. This produces a confusing error where the error states the value must be positive, even though to the user it is input as a positive number.
 
 In a infinite loop, the program is unable to handle user inputs. Thus if you believe the program got stuck in a infinite loop, you will have to manually close the application.
 The following conditions increase the chance of the physics engine entering a infinite loop, the values first in the simulationConfig.txt are considered to be taken as their base reference level:
