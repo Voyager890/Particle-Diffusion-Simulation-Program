@@ -22,6 +22,7 @@
 #include <glm/ext/vector_float4.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/geometric.hpp>
+#include <locale>
 #include <math.h>
 
 #include <new>
@@ -207,6 +208,8 @@ int main(){
     // Output data initialize
     std::vector<std::vector<size_t>> outputData(particleTypesAmount);
     std::vector<size_t> collisionsWithinTimeInterval(particleTypesAmount);
+
+    bool error_flag = false;
     
     std::cout << std::endl << "-- Starting simulation --" << std::endl;
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wire Frame
@@ -218,7 +221,8 @@ int main(){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Physics
-      physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval); 
+      physicsEngine(particleTypePointer, particleTypesAmount, borderArea, collisionsWithinTimeInterval, error_flag); 
+      if(error_flag){break;}
 
       // Harvest resultantData
       if(glfwGetTime() > nextCollectionTime){

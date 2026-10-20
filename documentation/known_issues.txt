@@ -1,7 +1,11 @@
-If a particle spawns outside the border. It cannot get back in, constantly triggering border collisions in the physics engine in a enldess loop.(MEDIUM)
+If a particle spawns outside the borderm It cannot get back in, constantly triggering border collisions in the physics engine in a infinite loop.
 
-When a input value becomes too large. it is takes as a negative value, must implement upper bound for suitable data type.(HIGH)
+When a input value becomes too large, the variable overflows and takes it as a negative value.
 
-When the initial particle speed is too high and border area too low. then the physics engines border collisions handler enters a infinite loop. Either calculate the ratio where this happens or introduce a "watchdog" where if the main loop doesnt loop within a expected interval, then it is assumed it has entered a infinite loop and exits the program with the appropriate error messege and handling advice. (HIGH)
+In a infinite loop, the program is unable to handle user inputs. Thus if you believe the program got stuck in a infinite loop, you will have to manually close the application.
+The following conditions increase the chance of the physics engine entering a infinite loop, the values first in the simulationConfig.txt are considered to be taken as their base reference level:
+- High particle speed
+- Low border area
+- Less particles with large radius
 
 

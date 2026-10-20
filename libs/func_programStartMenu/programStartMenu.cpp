@@ -19,7 +19,7 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
   do{
 
     std::cout << std::endl << "-- Enter the number of an option from below --" << std::endl
-                          << " 1 : Defualt Values" << std::endl 
+                          << " 1 : Auto-Input Test Values" << std::endl 
                           << " 2 : Manual CLI Entry" << std::endl
                           << " 3 : File Entry" << std::endl
                           << " 4 : Quit program" << std::endl;
@@ -66,7 +66,7 @@ void programInit(class_particleInitHelper*& particleInitHelper, int& count_parti
 }
 
 void defaultInit(class_particleInitHelper*& particleInitHelper, int& count_particleTypes, float& borderArea){
-    std::cout << std::endl << "-- Initializeing program with default values --" << std::endl;
+    std::cout << std::endl << "-- Initializeing program with test values --" << std::endl;
 
     borderArea = 27;
 
@@ -208,8 +208,12 @@ void fileInit(class_particleInitHelper*& particleInitHelper, int& count_particle
     if(errorFlag != 0){break;}
     particleInitHelper->radius[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
+
     particleInitHelper->speed[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
+
+    particleInitHelper->speed[i] *= 0.01; // Convert to measurment used in program
+    
     particleInitHelper->particleCount[i] = std::stof(extractString(configFile, currentElement, errorFlag));
     if(errorFlag != 0){break;}
 

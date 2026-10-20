@@ -11,23 +11,29 @@
 #include "class_particles/particles.h"
 #include "debug_tools/debug_tools.h"
 
-void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea, std::vector<size_t>& collisionsWithinTimeInterval) {
+void physicsEngine(class_particleType **&particleTypePointer, const int particleTypesAmount, const float borderArea, std::vector<size_t>& collisionsWithinTimeInterval, bool& error_flag) {
   const double borderDisplacement = std::cbrt(borderArea) / 2.0;
   
-  // dual processing? 
   for (int currentType = 0; currentType < particleTypesAmount; currentType++) {
     for (int currentParticle = 0; currentParticle < particleTypePointer[currentType]->particleCount; currentParticle++) {
       
       collisionsWithinTimeInterval.at(currentType) +=
         particleCollisionHandler(particleTypePointer, currentType,
                                currentParticle, particleTypesAmount);
-      //std::cout << currentType << " After P-P check"<< collisionsWithinTimeInterval[currentType] << std::endl;
+
+
+
       collisionsWithinTimeInterval.at(currentType) +=
         borderCollisionHandler(
           particleTypePointer[currentType]->particle[currentParticle],
           particleTypePointer[currentType]->particleRadius, borderDisplacement);
 
-      //std::cout << currentType << " After P-C check"<< collisionsWithinTimeInterval[currentType] << std::endl << std::endl;
+      if(collisionsWithinTimeInterval.at(currentType) == -1){
+        collisionsWithinTimeInterval.pop_back();
+        error_flag = true;
+        return;
+      }
+
       particleTypePointer[currentType]->particle[currentParticle].position += particleTypePointer[currentType]->particle[currentParticle].velocity + particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer;
       particleTypePointer[currentType]->particle[currentParticle].positionCorrectionBuffer = glm::vec3(0.0);
       
@@ -39,6 +45,8 @@ size_t borderCollisionHandler(class_particle &particle, const float particleRadi
   // Toggles direction based on which axis border was crossed
   size_t numberOfCollision = 0;
   bool borderCollision = false;
+
+  size_t attempts = 0;
 
   do {
     borderCollision = false;
@@ -55,6 +63,15 @@ size_t borderCollisionHandler(class_particle &particle, const float particleRadi
       const double deflectionVector = std::copysign(trespassMagnitude, particle.velocity[i]);
       particle.positionCorrectionBuffer[i] += deflectionVector;
 
+    }
+
+    attempts++;
+    if(attempts > 10000){
+      std::cout << "ERROR: PHYSICS ENGINE TOOK TOO MANY ATTEMPTS TO RESOLVE A BORDER COLLISION, ASSUMING THE PHYSICS ENGINE GOT STUCK IN A INFINTIE LOOP," << std::endl
+         << " READ /documentation/known_issues.txt TO SEE POSSIBLE CAUSES." << std::endl;
+
+      borderCollision = false;
+      numberOfCollision = -1;
     }
   } while (borderCollision);
 
